@@ -291,9 +291,17 @@
       <button class="btn-menu btn-jugar" id="btn-jugar">🧙 Jugar</button>
       <button class="btn-menu btn-config" id="btn-ir-config">⚙️ Configuración</button>
       <button class="btn-menu btn-musica" id="btn-musica-menu">🔇 Música: Apagada</button>
+      <button class="btn-menu btn-config" id="btn-ir-hechizos">📖 Tus hechizos</button>
     </div>
 
     <div class="menu-hechizos-badge" id="badge-hechizos"></div>
+  </div>
+
+  <!-- ══ HECHIZOS ══ -->
+  <div class="pantalla" id="pantalla-hechizos">
+    <div class="config-titulo">📖 Tus hechizos</div>
+    <div class="grimorio-grid" id="grimorio-grid-menu" style="width:100%;"></div>
+    <button class="btn-volver" id="btn-volver-hechizos" style="margin-top:20px;">← Volver al menú</button>
   </div>
 
   <!-- ══ CONFIGURACIÓN ══ -->
@@ -458,8 +466,8 @@
     return pend.length ? pend[Math.floor(Math.random() * pend.length)] : null;
   }
 
-  function renderGrimorio() {
-    const grid = document.getElementById('grimorio-grid');
+  function renderGrimorio(targetId) {
+    const grid = document.getElementById(targetId || 'grimorio-grid');
     if (!hechizosDesbloqueados.length) {
       grid.innerHTML = '<div class="grimorio-empty">Ganá una partida para desbloquear tu primer hechizo.</div>';
       return;
@@ -565,6 +573,8 @@
   // ── Eventos ──────────────────────────────────────────────────────────
   document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
   document.getElementById('btn-ir-config').addEventListener('click', () => mostrar('pantalla-config'));
+  document.getElementById('btn-ir-hechizos').addEventListener('click', () => { mostrar('pantalla-hechizos'); renderGrimorio('grimorio-grid-menu'); });
+  document.getElementById('btn-volver-hechizos').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-musica-menu').addEventListener('click', toggleMusica);
   document.getElementById('btn-volver-config').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-volver-juego').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
