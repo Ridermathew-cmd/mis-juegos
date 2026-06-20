@@ -301,11 +301,16 @@
     <div class="config-titulo">⚙️ Configuración</div>
 
     <div class="config-seccion">
-      <div class="config-label">Dificultad</div>
-      <div class="config-opciones">
-        <button class="btn-opcion seleccionado" data-dif="facil">😊 Fácil<br><small>12 cartas</small></button>
-        <button class="btn-opcion" data-dif="normal">⚡ Normal<br><small>16 cartas</small></button>
-        <button class="btn-opcion" data-dif="dificil">💀 Difícil<br><small>20 cartas</small></button>
+      <div class="config-label">Cantidad de cartas</div>
+      <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
+        <span style="color:#9b8ec4; font-size:13px;">6</span>
+        <input type="range" id="slider-cartas" min="3" max="10" step="1" style="flex:1;"
+               value="8" />
+        <span style="color:#9b8ec4; font-size:13px;">20</span>
+      </div>
+      <div style="text-align:center; margin-top:10px;">
+        <span id="cartas-valor" style="font-size:22px; font-weight:600; color:#e8d5a3;">16</span>
+        <span style="font-size:13px; color:#9b8ec4;"> cartas</span>
       </div>
     </div>
 
@@ -380,11 +385,10 @@
   ];
 
   // ── Configuración guardada ───────────────────────────────────────────
-  let config = JSON.parse(localStorage.getItem('config') || '{"dificultad":"normal","velocidad":"normal"}');
+  let config = JSON.parse(localStorage.getItem('config') || '{"pares":8,"velocidad":"normal"}');
   let hechizosDesbloqueados = JSON.parse(localStorage.getItem('hechizos') || '[]');
 
-  const DIFICULTAD_PARES = { facil: 6, normal: 8, dificil: 10 };
-  const VELOCIDAD_MS     = { lenta: 700, normal: 400, rapida: 180 };
+  const VELOCIDAD_MS = { lenta: 700, normal: 400, rapida: 180 };
 
   // ── Estado del juego ─────────────────────────────────────────────────
   let voltedas = [], parejas = 0, intentos = 0, bloqueado = false, segundos = 0, intervalo = null;
@@ -486,7 +490,7 @@
     document.getElementById('win-screen').classList.remove('visible');
     document.getElementById('spell-unlock').style.display = 'none';
 
-    const numPares = DIFICULTAD_PARES[config.dificultad];
+    const numPares = config.pares;
     const emojis = mezclar(EMOJIS_TODOS).slice(0, numPares);
     const cartas = mezclar([...emojis, ...emojis]);
 
@@ -526,7 +530,7 @@
       voltedas = [];
       parejas++;
       document.getElementById('parejas').textContent = parejas;
-      if (parejas === DIFICULTAD_PARES[config.dificultad]) ganar();
+      if (parejas === config.pares) ganar();
     } else {
       bloqueado = true;
       const vel = VELOCIDAD_MS[config.velocidad];
@@ -568,15 +572,15 @@
   document.getElementById('btn-jugar-de-nuevo').addEventListener('click', iniciar);
   document.getElementById('btn-win-menu').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
 
-  // Botones de configuración — dificultad
-  document.querySelectorAll('[data-dif]').forEach(btn => {
-    if (btn.dataset.dif === config.dificultad) btn.classList.add('seleccionado');
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-dif]').forEach(b => b.classList.remove('seleccionado'));
-      btn.classList.add('seleccionado');
-      config.dificultad = btn.dataset.dif;
-      localStorage.setItem('config', JSON.stringify(config));
-    });
+  // Slider de cartas
+  const slider = document.getElementById('slider-cartas');
+  const cartasValor = document.getElementById('cartas-valor');
+  slider.value = config.pares;
+  cartasValor.textContent = config.pares * 2;
+  slider.addEventListener('input', () => {
+    config.pares = Number(slider.value);
+    cartasValor.textContent = config.pares * 2;
+    localStorage.setItem('config', JSON.stringify(config));
   });
 
   // Botones de configuración — velocidad
