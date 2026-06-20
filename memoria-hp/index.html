@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Memoria Mágica ⚡</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: system-ui, sans-serif;
@@ -21,369 +17,424 @@
       padding: 20px 12px 40px;
     }
 
-    h1 {
-      color: #e8d5a3;
-      font-size: 24px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      letter-spacing: 1px;
+    /* ── Pantallas ── */
+    .pantalla { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
+    .pantalla.activa { display: flex; animation: fadeIn 0.4s ease; }
+
+    /* ── Menú principal ── */
+    .menu-logo {
+      font-size: 64px;
+      margin-bottom: 12px;
+      margin-top: 40px;
+      animation: flotar 3s ease-in-out infinite;
     }
 
-    .subtitle {
+    .menu-titulo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #e8d5a3;
+      letter-spacing: 2px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .menu-subtitulo {
+      font-size: 13px;
+      color: #9b8ec4;
+      margin-bottom: 48px;
+      text-align: center;
+    }
+
+    .menu-botones {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+    }
+
+    .btn-menu {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    .btn-menu:active { transform: scale(0.97); opacity: 0.85; }
+
+    .btn-jugar {
+      background: #e8d5a3;
+      color: #1a1040;
+    }
+
+    .btn-config {
+      background: #2a1f5e;
+      color: #e8d5a3;
+      border: 1px solid #534AB7;
+    }
+
+    .btn-musica {
+      background: #2a1f5e;
+      color: #e8d5a3;
+      border: 1px solid #534AB7;
+    }
+
+    .menu-hechizos-badge {
+      margin-top: 32px;
+      font-size: 12px;
+      color: #534AB7;
+    }
+
+    /* ── Pantalla de configuración ── */
+    .config-titulo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e8d5a3;
+      margin-bottom: 24px;
+      margin-top: 20px;
+    }
+
+    .config-seccion {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .config-label {
+      font-size: 12px;
+      color: #9b8ec4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .config-opciones {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-opcion {
+      flex: 1;
+      padding: 12px 8px;
+      border-radius: 10px;
+      border: 1px solid #3d2f7a;
+      background: #2a1f5e;
+      color: #9b8ec4;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .btn-opcion.seleccionado {
+      border-color: #e8d5a3;
+      color: #e8d5a3;
+      background: #3C3489;
+    }
+
+    .btn-volver {
+      margin-top: 10px;
+      padding: 14px 32px;
+      border-radius: 12px;
+      border: 1px solid #534AB7;
+      background: transparent;
+      color: #9b8ec4;
+      font-size: 15px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .btn-volver:hover { color: #e8d5a3; }
+
+    /* ── Pantalla de juego ── */
+    .juego-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .btn-menu-juego {
+      background: transparent;
+      border: 1px solid #3d2f7a;
+      border-radius: 8px;
       color: #9b8ec4;
       font-size: 13px;
-      margin-bottom: 20px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    .juego-titulo {
+      font-size: 16px;
+      font-weight: 600;
+      color: #e8d5a3;
     }
 
     .stats {
       display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
+      gap: 10px;
+      margin-bottom: 16px;
+      width: 100%;
     }
 
     .stat-box {
+      flex: 1;
       background: #2a1f5e;
       border: 1px solid #3d2f7a;
       border-radius: 10px;
-      padding: 10px 20px;
+      padding: 8px 4px;
       text-align: center;
-      min-width: 80px;
     }
 
-    .stat-value {
-      font-size: 22px;
-      font-weight: 600;
-      color: #e8d5a3;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      color: #9b8ec4;
-      margin-top: 2px;
-    }
+    .stat-value { font-size: 20px; font-weight: 600; color: #e8d5a3; }
+    .stat-label { font-size: 10px; color: #9b8ec4; margin-top: 2px; }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      max-width: 360px;
       width: 100%;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
-    .card {
-      aspect-ratio: 1;
-      cursor: pointer;
-      perspective: 600px;
-    }
+    .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    .grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+    .card { aspect-ratio: 1; cursor: pointer; perspective: 600px; }
 
     .card-inner {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.4s ease;
       border-radius: 10px;
     }
 
-    .card.flipped .card-inner {
-      transform: rotateY(180deg);
-    }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
 
-    .card-front,
-    .card-back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+    .card-front, .card-back {
+      position: absolute; width: 100%; height: 100%;
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
 
-    .card-back {
-      background: #3C3489;
-      border: 2px solid #534AB7;
-      font-size: 24px;
-    }
-
-    .card-front {
-      background: #f5f0ff;
-      border: 2px solid #9b8ec4;
-      font-size: 32px;
-      transform: rotateY(180deg);
-    }
-
-    .card.matched .card-front {
-      background: #d4edda;
-      border-color: #5a9e6f;
-    }
-
-    .card.blocked {
-      pointer-events: none;
-    }
+    .card-back { background: #3C3489; border: 2px solid #534AB7; font-size: 24px; }
+    .card-front { background: #f5f0ff; border: 2px solid #9b8ec4; font-size: 32px; transform: rotateY(180deg); }
+    .card.matched .card-front { background: #d4edda; border-color: #5a9e6f; }
+    .card.blocked { pointer-events: none; }
 
     .btn-restart {
-      background: #3C3489;
-      color: #e8d5a3;
-      border: 1px solid #534AB7;
-      border-radius: 10px;
-      padding: 12px 32px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: background 0.2s;
+      background: #3C3489; color: #e8d5a3;
+      border: 1px solid #534AB7; border-radius: 10px;
+      padding: 12px 32px; font-size: 15px;
+      cursor: pointer; transition: background 0.2s;
     }
+    .btn-restart:hover { background: #534AB7; }
 
-    .btn-restart:hover {
-      background: #534AB7;
-    }
-
-    /* Pantalla de victoria */
+    /* ── Victoria ── */
     .win-screen {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-top: 12px;
-      animation: fadeIn 0.5s ease;
+      display: none; flex-direction: column; align-items: center;
+      gap: 10px; margin-top: 12px; animation: fadeIn 0.5s ease;
     }
+    .win-screen.visible { display: flex; }
+    .win-title { font-size: 26px; color: #e8d5a3; font-weight: 700; }
+    .win-msg { color: #9b8ec4; font-size: 13px; text-align: center; }
 
-    .win-screen.visible {
-      display: flex;
-    }
-
-    .win-title {
-      font-size: 28px;
-      color: #e8d5a3;
-      font-weight: 600;
-    }
-
-    .win-msg {
-      color: #9b8ec4;
-      font-size: 14px;
-      text-align: center;
-    }
-
-    /* Hechizo desbloqueado */
     .spell-unlock {
-      background: #2a1f5e;
-      border: 1px solid #e8d5a3;
-      border-radius: 12px;
-      padding: 14px 20px;
-      text-align: center;
-      max-width: 300px;
+      background: #2a1f5e; border: 1px solid #e8d5a3;
+      border-radius: 12px; padding: 14px 20px;
+      text-align: center; max-width: 300px;
       animation: aparecer 0.6s ease;
     }
+    .spell-unlock-label { font-size: 11px; color: #9b8ec4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .spell-name { font-size: 20px; color: #e8d5a3; font-weight: 600; margin-bottom: 4px; }
+    .spell-desc { font-size: 13px; color: #b8a9d9; line-height: 1.5; }
 
-    .spell-unlock-label {
-      font-size: 11px;
-      color: #9b8ec4;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .spell-name {
-      font-size: 20px;
-      color: #e8d5a3;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .spell-desc {
-      font-size: 13px;
-      color: #b8a9d9;
-      line-height: 1.5;
-    }
-
-    /* Grimorio — colección de hechizos */
-    .grimorio {
-      margin-top: 28px;
-      width: 100%;
-      max-width: 360px;
-    }
-
-    .grimorio-title {
-      color: #e8d5a3;
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      text-align: center;
-      letter-spacing: 0.5px;
-    }
-
-    .grimorio-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    /* ── Grimorio ── */
+    .grimorio { margin-top: 28px; width: 100%; max-width: 360px; }
+    .grimorio-title { color: #e8d5a3; font-size: 15px; font-weight: 600; margin-bottom: 12px; text-align: center; }
+    .grimorio-grid { display: flex; flex-direction: column; gap: 8px; }
 
     .spell-card {
-      background: #2a1f5e;
-      border: 1px solid #3d2f7a;
-      border-radius: 10px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      background: #2a1f5e; border: 1px solid #3d2f7a;
+      border-radius: 10px; padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
       animation: aparecer 0.4s ease;
     }
+    .spell-card-emoji { font-size: 22px; flex-shrink: 0; }
+    .spell-card-name { font-size: 14px; color: #e8d5a3; font-weight: 600; }
+    .spell-card-desc { font-size: 12px; color: #9b8ec4; margin-top: 2px; line-height: 1.4; }
+    .grimorio-empty { color: #534AB7; font-size: 13px; text-align: center; padding: 16px; border: 1px dashed #3d2f7a; border-radius: 10px; }
 
-    .spell-card-emoji {
-      font-size: 22px;
-      flex-shrink: 0;
-    }
-
-    .spell-card-info {
-      flex: 1;
-    }
-
-    .spell-card-name {
-      font-size: 14px;
-      color: #e8d5a3;
-      font-weight: 600;
-    }
-
-    .spell-card-desc {
-      font-size: 12px;
-      color: #9b8ec4;
-      margin-top: 2px;
-      line-height: 1.4;
-    }
-
-    .grimorio-empty {
-      color: #534AB7;
-      font-size: 13px;
-      text-align: center;
-      padding: 16px;
-      border: 1px dashed #3d2f7a;
-      border-radius: 10px;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes aparecer {
-      from { opacity: 0; transform: scale(0.95); }
-      to   { opacity: 1; transform: scale(1); }
-    }
-
-    /* Botón de música */
-    .music-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #2a1f5e;
-      border: 1px solid #534AB7;
-      font-size: 22px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: background 0.2s;
-    }
-
-    .music-btn:hover { background: #3C3489; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes aparecer { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    @keyframes flotar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   </style>
 </head>
 <body>
 
-  <h1>⚡ Memoria Mágica</h1>
-  <p class="subtitle">Encuentra todas las parejas</p>
+  <!-- ══ MENÚ PRINCIPAL ══ -->
+  <div class="pantalla activa" id="pantalla-menu">
+    <div class="menu-logo">⚡</div>
+    <div class="menu-titulo">Memoria Mágica</div>
+    <div class="menu-subtitulo">Juego de parejas Harry Potter</div>
 
-  <div class="stats">
-    <div class="stat-box">
-      <div class="stat-value" id="intentos">0</div>
-      <div class="stat-label">Intentos</div>
+    <div class="menu-botones">
+      <button class="btn-menu btn-jugar" id="btn-jugar">🧙 Jugar</button>
+      <button class="btn-menu btn-config" id="btn-ir-config">⚙️ Configuración</button>
+      <button class="btn-menu btn-musica" id="btn-musica-menu">🔇 Música: Apagada</button>
     </div>
-    <div class="stat-box">
-      <div class="stat-value" id="parejas">0</div>
-      <div class="stat-label">Parejas</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value" id="tiempo">0:00</div>
-      <div class="stat-label">Tiempo</div>
-    </div>
+
+    <div class="menu-hechizos-badge" id="badge-hechizos"></div>
   </div>
 
-  <div class="grid" id="grid"></div>
+  <!-- ══ CONFIGURACIÓN ══ -->
+  <div class="pantalla" id="pantalla-config">
+    <div class="config-titulo">⚙️ Configuración</div>
 
-  <button class="btn-restart" id="btn-restart">Nuevo juego</button>
-
-  <div class="win-screen" id="win-screen">
-    <div class="win-title">🎉 ¡Expecto Patronum!</div>
-    <div class="win-msg" id="win-msg"></div>
-    <div class="spell-unlock" id="spell-unlock">
-      <div class="spell-unlock-label">✨ Hechizo desbloqueado</div>
-      <div class="spell-name" id="spell-name"></div>
-      <div class="spell-desc" id="spell-desc"></div>
+    <div class="config-seccion">
+      <div class="config-label">Dificultad</div>
+      <div class="config-opciones">
+        <button class="btn-opcion seleccionado" data-dif="facil">😊 Fácil<br><small>12 cartas</small></button>
+        <button class="btn-opcion" data-dif="normal">⚡ Normal<br><small>16 cartas</small></button>
+        <button class="btn-opcion" data-dif="dificil">💀 Difícil<br><small>20 cartas</small></button>
+      </div>
     </div>
+
+    <div class="config-seccion">
+      <div class="config-label">Velocidad de volteo</div>
+      <div class="config-opciones">
+        <button class="btn-opcion" data-vel="lenta">🐢 Lenta</button>
+        <button class="btn-opcion seleccionado" data-vel="normal">⚡ Normal</button>
+        <button class="btn-opcion" data-vel="rapida">🚀 Rápida</button>
+      </div>
+    </div>
+
+    <button class="btn-volver" id="btn-volver-config">← Volver al menú</button>
   </div>
 
-  <!-- Botón música -->
-  <button class="music-btn" id="music-btn" title="Música">🔇</button>
+  <!-- ══ JUEGO ══ -->
+  <div class="pantalla" id="pantalla-juego">
+    <div class="juego-header">
+      <button class="btn-menu-juego" id="btn-volver-juego">← Menú</button>
+      <div class="juego-titulo">⚡ Memoria Mágica</div>
+      <div style="width:60px"></div>
+    </div>
 
-  <!-- Grimorio: colección de hechizos conseguidos -->
-  <div class="grimorio" id="grimorio">
-    <div class="grimorio-title">📖 Tu Grimorio</div>
-    <div class="grimorio-grid" id="grimorio-grid"></div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-value" id="intentos">0</div><div class="stat-label">Intentos</div></div>
+      <div class="stat-box"><div class="stat-value" id="parejas">0</div><div class="stat-label">Parejas</div></div>
+      <div class="stat-box"><div class="stat-value" id="tiempo">0:00</div><div class="stat-label">Tiempo</div></div>
+    </div>
+
+    <div class="grid grid-4" id="grid"></div>
+
+    <button class="btn-restart" id="btn-restart">Nuevo juego</button>
+
+    <div class="win-screen" id="win-screen">
+      <div class="win-title">🎉 ¡Expecto Patronum!</div>
+      <div class="win-msg" id="win-msg"></div>
+      <div class="spell-unlock" id="spell-unlock" style="display:none">
+        <div class="spell-unlock-label">✨ Hechizo desbloqueado</div>
+        <div class="spell-name" id="spell-name"></div>
+        <div class="spell-desc" id="spell-desc"></div>
+      </div>
+      <button class="btn-restart" id="btn-jugar-de-nuevo">Jugar de nuevo</button>
+      <button class="btn-volver" id="btn-win-menu">Ir al menú</button>
+    </div>
+
+    <div class="grimorio" id="grimorio">
+      <div class="grimorio-title">📖 Tu Grimorio</div>
+      <div class="grimorio-grid" id="grimorio-grid"></div>
+    </div>
   </div>
 
 <script>
-  const EMOJIS = ['🧙', '🦉', '🪄', '🎩', '🧹', '🫧', '📖', '⚡'];
+  // ── Datos ────────────────────────────────────────────────────────────
+  const EMOJIS_TODOS = ['🧙','🦉','🪄','🎩','🧹','🫧','📖','⚡','🐍','🦁','🦅','🦡','🔮','💊','🌙'];
 
-  // Lista de hechizos disponibles para desbloquear
   const HECHIZOS = [
-    { emoji: '✨', nombre: 'Lumos',          desc: 'Ilumina la punta de tu varita en la oscuridad.' },
-    { emoji: '🌀', nombre: 'Wingardium Leviosa', desc: 'Hace levitar objetos con un simple movimiento.' },
-    { emoji: '🛡️', nombre: 'Protego',        desc: 'Crea un escudo mágico que bloquea hechizos.' },
-    { emoji: '🔥', nombre: 'Incendio',        desc: 'Lanza una llama directamente desde tu varita.' },
-    { emoji: '❄️', nombre: 'Glacius',         desc: 'Congela al objetivo con un chorro de hielo.' },
-    { emoji: '💨', nombre: 'Ventus',          desc: 'Genera una ráfaga de viento poderosa.' },
-    { emoji: '🌿', nombre: 'Herbivicus',      desc: 'Hace crecer plantas a una velocidad increíble.' },
-    { emoji: '⚡', nombre: 'Expelliarmus',    desc: 'El hechizo desarmador favorito de Harry Potter.' },
-    { emoji: '🌟', nombre: 'Expecto Patronum',desc: 'Invoca un Patronus para ahuyentar a los Dementores.' },
-    { emoji: '🔮', nombre: 'Revelio',         desc: 'Revela objetos, personas o secretos ocultos.' },
-    { emoji: '🦋', nombre: 'Alohomora',       desc: 'Abre cualquier cerradura con un toque de varita.' },
-    { emoji: '🌙', nombre: 'Nox',             desc: 'Apaga la luz de tu varita encendida con Lumos.' },
-    { emoji: '💫', nombre: 'Accio',           desc: 'Llama cualquier objeto hacia tus manos al instante.' },
-    { emoji: '🎭', nombre: 'Riddikulus',      desc: 'Transforma a un Boggart en algo gracioso e inofensivo.' },
-    { emoji: '🕊️', nombre: 'Reparo',          desc: 'Repara objetos rotos como si nunca se hubieran roto.' },
+    { emoji:'✨', nombre:'Lumos',             desc:'Ilumina la punta de tu varita en la oscuridad.' },
+    { emoji:'🌀', nombre:'Wingardium Leviosa',desc:'Hace levitar objetos con un simple movimiento.' },
+    { emoji:'🛡️', nombre:'Protego',           desc:'Crea un escudo mágico que bloquea hechizos.' },
+    { emoji:'🔥', nombre:'Incendio',           desc:'Lanza una llama directamente desde tu varita.' },
+    { emoji:'❄️', nombre:'Glacius',            desc:'Congela al objetivo con un chorro de hielo.' },
+    { emoji:'💨', nombre:'Ventus',             desc:'Genera una ráfaga de viento poderosa.' },
+    { emoji:'🌿', nombre:'Herbivicus',         desc:'Hace crecer plantas a una velocidad increíble.' },
+    { emoji:'⚡', nombre:'Expelliarmus',       desc:'El hechizo desarmador favorito de Harry Potter.' },
+    { emoji:'🌟', nombre:'Expecto Patronum',   desc:'Invoca un Patronus para ahuyentar a los Dementores.' },
+    { emoji:'🔮', nombre:'Revelio',            desc:'Revela objetos, personas o secretos ocultos.' },
+    { emoji:'🦋', nombre:'Alohomora',          desc:'Abre cualquier cerradura con un toque de varita.' },
+    { emoji:'🌙', nombre:'Nox',               desc:'Apaga la luz de tu varita encendida con Lumos.' },
+    { emoji:'💫', nombre:'Accio',             desc:'Llama cualquier objeto hacia tus manos al instante.' },
+    { emoji:'🎭', nombre:'Riddikulus',         desc:'Transforma a un Boggart en algo gracioso.' },
+    { emoji:'🕊️', nombre:'Reparo',            desc:'Repara objetos rotos como si nunca se hubieran roto.' },
   ];
 
-  // Estado del juego
-  let cartas = [];
-  let voltedas = [];
-  let parejas = 0;
-  let intentos = 0;
-  let bloqueado = false;
-  let segundos = 0;
-  let intervalo = null;
-
-  // Hechizos guardados en localStorage (persisten entre sesiones)
+  // ── Configuración guardada ───────────────────────────────────────────
+  let config = JSON.parse(localStorage.getItem('config') || '{"dificultad":"normal","velocidad":"normal"}');
   let hechizosDesbloqueados = JSON.parse(localStorage.getItem('hechizos') || '[]');
 
-  // Referencias al DOM
-  const grid          = document.getElementById('grid');
-  const elIntentos    = document.getElementById('intentos');
-  const elParejas     = document.getElementById('parejas');
-  const elTiempo      = document.getElementById('tiempo');
-  const winScreen     = document.getElementById('win-screen');
-  const winMsg        = document.getElementById('win-msg');
-  const btnRestart    = document.getElementById('btn-restart');
-  const spellUnlock   = document.getElementById('spell-unlock');
-  const elSpellName   = document.getElementById('spell-name');
-  const elSpellDesc   = document.getElementById('spell-desc');
-  const grimorioGrid  = document.getElementById('grimorio-grid');
+  const DIFICULTAD_PARES = { facil: 6, normal: 8, dificil: 10 };
+  const VELOCIDAD_MS     = { lenta: 700, normal: 400, rapida: 180 };
 
+  // ── Estado del juego ─────────────────────────────────────────────────
+  let voltedas = [], parejas = 0, intentos = 0, bloqueado = false, segundos = 0, intervalo = null;
+
+  // ── Música ───────────────────────────────────────────────────────────
+  let audioCtx = null, musicaActiva = false, nodos = [];
+  const MELODIA = [659,0,784,0,1047,988,784,0,1047,0,988,0,784,1047,988,0,880,0,698,0,932,880,698,0,698,0,659,0,784,0,659,0];
+
+  function crearCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  function tocarNota(freq, inicio, dur) {
+    if (!freq) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, inicio);
+    gain.gain.linearRampToValueAtTime(0.15, inicio + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, inicio + dur);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(inicio); osc.stop(inicio + dur + 0.1);
+    nodos.push(osc);
+  }
+
+  function reproducirMelodia() {
+    if (!musicaActiva) return;
+    const bpm = 160, dur = 60 / bpm, ahora = audioCtx.currentTime;
+    MELODIA.forEach((f, i) => tocarNota(f, ahora + i * dur, dur * 0.8));
+    setTimeout(() => { if (musicaActiva) reproducirMelodia(); }, MELODIA.length * dur * 1000);
+  }
+
+  function toggleMusica() {
+    crearCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    musicaActiva = !musicaActiva;
+    const txt = musicaActiva ? '🔊 Música: Encendida' : '🔇 Música: Apagada';
+    document.getElementById('btn-musica-menu').textContent = txt;
+    if (musicaActiva) { reproducirMelodia(); }
+    else { nodos.forEach(n => { try { n.stop(); } catch(e){} }); nodos = []; }
+  }
+
+  // ── Navegación entre pantallas ───────────────────────────────────────
+  function mostrar(id) {
+    document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+    document.getElementById(id).classList.add('activa');
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────
   function mezclar(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -394,213 +445,152 @@
   }
 
   function formatTiempo(s) {
-    const m = Math.floor(s / 60);
-    const ss = String(s % 60).padStart(2, '0');
-    return `${m}:${ss}`;
+    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
   }
 
-  // Devuelve un hechizo que todavía no fue desbloqueado, o null si ya los tenés todos
   function hechizoPendiente() {
     const nombres = hechizosDesbloqueados.map(h => h.nombre);
-    const pendientes = HECHIZOS.filter(h => !nombres.includes(h.nombre));
-    if (pendientes.length === 0) return null;
-    return pendientes[Math.floor(Math.random() * pendientes.length)];
+    const pend = HECHIZOS.filter(h => !nombres.includes(h.nombre));
+    return pend.length ? pend[Math.floor(Math.random() * pend.length)] : null;
   }
 
-  // Renderiza el grimorio completo
   function renderGrimorio() {
-    if (hechizosDesbloqueados.length === 0) {
-      grimorioGrid.innerHTML = '<div class="grimorio-empty">Ganá una partida para desbloquear tu primer hechizo.</div>';
+    const grid = document.getElementById('grimorio-grid');
+    if (!hechizosDesbloqueados.length) {
+      grid.innerHTML = '<div class="grimorio-empty">Ganá una partida para desbloquear tu primer hechizo.</div>';
       return;
     }
-    grimorioGrid.innerHTML = '';
+    grid.innerHTML = '';
     hechizosDesbloqueados.forEach(h => {
       const el = document.createElement('div');
       el.className = 'spell-card';
-      el.innerHTML = `
-        <div class="spell-card-emoji">${h.emoji}</div>
-        <div class="spell-card-info">
-          <div class="spell-card-name">${h.nombre}</div>
-          <div class="spell-card-desc">${h.desc}</div>
-        </div>`;
-      grimorioGrid.appendChild(el);
+      el.innerHTML = `<div class="spell-card-emoji">${h.emoji}</div><div><div class="spell-card-name">${h.nombre}</div><div class="spell-card-desc">${h.desc}</div></div>`;
+      grid.appendChild(el);
     });
   }
 
+  function actualizarBadge() {
+    const n = hechizosDesbloqueados.length;
+    document.getElementById('badge-hechizos').textContent =
+      n ? `📖 ${n} hechizo${n>1?'s':''} desbloqueado${n>1?'s':''}` : '';
+  }
+
+  // ── Juego ────────────────────────────────────────────────────────────
   function iniciar() {
-    voltedas = [];
-    parejas = 0;
-    intentos = 0;
-    bloqueado = false;
-    segundos = 0;
+    voltedas = []; parejas = 0; intentos = 0; bloqueado = false; segundos = 0;
     clearInterval(intervalo);
 
-    elIntentos.textContent = '0';
-    elParejas.textContent = '0';
-    elTiempo.textContent = '0:00';
-    winScreen.classList.remove('visible');
-    spellUnlock.style.display = 'none';
-    grid.innerHTML = '';
+    document.getElementById('intentos').textContent = '0';
+    document.getElementById('parejas').textContent = '0';
+    document.getElementById('tiempo').textContent = '0:00';
+    document.getElementById('win-screen').classList.remove('visible');
+    document.getElementById('spell-unlock').style.display = 'none';
 
-    cartas = mezclar([...EMOJIS, ...EMOJIS]);
+    const numPares = DIFICULTAD_PARES[config.dificultad];
+    const emojis = mezclar(EMOJIS_TODOS).slice(0, numPares);
+    const cartas = mezclar([...emojis, ...emojis]);
 
-    cartas.forEach((emoji, i) => {
+    const gridEl = document.getElementById('grid');
+    gridEl.innerHTML = '';
+    gridEl.className = 'grid ' + (numPares <= 6 ? 'grid-3' : 'grid-4');
+
+    cartas.forEach(emoji => {
       const card = document.createElement('div');
       card.className = 'card';
       card.dataset.emoji = emoji;
-      card.dataset.index = i;
-      card.innerHTML = `
-        <div class="card-inner">
-          <div class="card-back">⚡</div>
-          <div class="card-front">${emoji}</div>
-        </div>`;
+      card.innerHTML = `<div class="card-inner"><div class="card-back">⚡</div><div class="card-front">${emoji}</div></div>`;
       card.addEventListener('click', () => voltear(card));
-      grid.appendChild(card);
+      gridEl.appendChild(card);
     });
 
     intervalo = setInterval(() => {
       segundos++;
-      elTiempo.textContent = formatTiempo(segundos);
+      document.getElementById('tiempo').textContent = formatTiempo(segundos);
     }, 1000);
+
+    renderGrimorio();
   }
 
   function voltear(card) {
-    if (bloqueado) return;
-    if (card.classList.contains('flipped')) return;
-    if (card.classList.contains('matched')) return;
-
+    if (bloqueado || card.classList.contains('flipped') || card.classList.contains('matched')) return;
     card.classList.add('flipped');
     voltedas.push(card);
-
-    if (voltedas.length === 2) {
-      intentos++;
-      elIntentos.textContent = intentos;
-      comparar();
-    }
+    if (voltedas.length === 2) { intentos++; document.getElementById('intentos').textContent = intentos; comparar(); }
   }
 
   function comparar() {
     const [a, b] = voltedas;
-    const sonPareja = a.dataset.emoji === b.dataset.emoji;
-
-    if (sonPareja) {
-      a.classList.add('matched', 'blocked');
-      b.classList.add('matched', 'blocked');
+    if (a.dataset.emoji === b.dataset.emoji) {
+      a.classList.add('matched','blocked');
+      b.classList.add('matched','blocked');
       voltedas = [];
       parejas++;
-      elParejas.textContent = parejas;
-
-      if (parejas === EMOJIS.length) {
-        ganar();
-      }
+      document.getElementById('parejas').textContent = parejas;
+      if (parejas === DIFICULTAD_PARES[config.dificultad]) ganar();
     } else {
       bloqueado = true;
+      const vel = VELOCIDAD_MS[config.velocidad];
       setTimeout(() => {
-        a.classList.remove('flipped');
-        b.classList.remove('flipped');
-        voltedas = [];
-        bloqueado = false;
-      }, 1000);
+        a.classList.remove('flipped'); b.classList.remove('flipped');
+        voltedas = []; bloqueado = false;
+      }, vel);
     }
   }
 
   function ganar() {
     clearInterval(intervalo);
-    winMsg.textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
-    winScreen.classList.add('visible');
+    document.getElementById('win-msg').textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
+    document.getElementById('win-screen').classList.add('visible');
 
-    // Desbloquear un hechizo nuevo
     const nuevo = hechizoPendiente();
+    const su = document.getElementById('spell-unlock');
+    su.style.display = 'block';
     if (nuevo) {
       hechizosDesbloqueados.push(nuevo);
       localStorage.setItem('hechizos', JSON.stringify(hechizosDesbloqueados));
-      elSpellName.textContent = `${nuevo.emoji} ${nuevo.nombre}`;
-      elSpellDesc.textContent = nuevo.desc;
-      spellUnlock.style.display = 'block';
+      document.getElementById('spell-name').textContent = `${nuevo.emoji} ${nuevo.nombre}`;
+      document.getElementById('spell-desc').textContent = nuevo.desc;
     } else {
-      // Ya los desbloqueó todos
-      spellUnlock.style.display = 'block';
-      elSpellName.textContent = '🏆 ¡Maestro Mago!';
-      elSpellDesc.textContent = 'Ya desbloqueaste todos los hechizos del grimorio.';
+      document.getElementById('spell-name').textContent = '🏆 ¡Maestro Mago!';
+      document.getElementById('spell-desc').textContent = 'Ya desbloqueaste todos los hechizos del grimorio.';
     }
-
     renderGrimorio();
+    actualizarBadge();
   }
 
-  btnRestart.addEventListener('click', iniciar);
+  // ── Eventos ──────────────────────────────────────────────────────────
+  document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
+  document.getElementById('btn-ir-config').addEventListener('click', () => mostrar('pantalla-config'));
+  document.getElementById('btn-musica-menu').addEventListener('click', toggleMusica);
+  document.getElementById('btn-volver-config').addEventListener('click', () => mostrar('pantalla-menu'));
+  document.getElementById('btn-volver-juego').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
+  document.getElementById('btn-restart').addEventListener('click', iniciar);
+  document.getElementById('btn-jugar-de-nuevo').addEventListener('click', iniciar);
+  document.getElementById('btn-win-menu').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
 
-  // ── Música generada con Web Audio API ───────────────────────────────
-  let audioCtx = null;
-  let musicaActiva = false;
-  let nodos = [];
-  const musicBtn = document.getElementById('music-btn');
-
-  // Melodía mágica: frecuencias en Hz (escala de Mi menor, estilo Hedwig)
-  const MELODIA = [
-    659, 0, 784, 0, 1047, 988, 784, 0,
-    1047, 0, 988, 0, 784, 1047, 988, 0,
-    880, 0, 698, 0, 932, 880, 698, 0,
-    698, 0, 659, 0, 784, 0, 659, 0,
-  ];
-
-  function crearAudioCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  function tocarNota(frecuencia, inicio, duracion, volumen) {
-    if (!frecuencia) return;
-    const osc    = audioCtx.createOscillator();
-    const gain   = audioCtx.createGain();
-    const reverb = audioCtx.createConvolver();
-
-    osc.type = 'triangle';
-    osc.frequency.value = frecuencia;
-
-    gain.gain.setValueAtTime(0, inicio);
-    gain.gain.linearRampToValueAtTime(volumen, inicio + 0.05);
-    gain.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(inicio);
-    osc.stop(inicio + duracion + 0.1);
-    nodos.push(osc);
-  }
-
-  function reproducirMelodia() {
-    if (!musicaActiva) return;
-    const bpm = 160;
-    const duracionNota = 60 / bpm;
-    const ahora = audioCtx.currentTime;
-
-    MELODIA.forEach((freq, i) => {
-      tocarNota(freq, ahora + i * duracionNota, duracionNota * 0.8, 0.15);
+  // Botones de configuración — dificultad
+  document.querySelectorAll('[data-dif]').forEach(btn => {
+    if (btn.dataset.dif === config.dificultad) btn.classList.add('seleccionado');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-dif]').forEach(b => b.classList.remove('seleccionado'));
+      btn.classList.add('seleccionado');
+      config.dificultad = btn.dataset.dif;
+      localStorage.setItem('config', JSON.stringify(config));
     });
+  });
 
-    const totalDuracion = MELODIA.length * duracionNota * 1000;
-    setTimeout(() => { if (musicaActiva) reproducirMelodia(); }, totalDuracion);
-  }
+  // Botones de configuración — velocidad
+  document.querySelectorAll('[data-vel]').forEach(btn => {
+    if (btn.dataset.vel === config.velocidad) btn.classList.add('seleccionado');
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-vel]').forEach(b => b.classList.remove('seleccionado'));
+      btn.classList.add('seleccionado');
+      config.velocidad = btn.dataset.vel;
+      localStorage.setItem('config', JSON.stringify(config));
+    });
+  });
 
-  function toggleMusica() {
-    crearAudioCtx();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    musicaActiva = !musicaActiva;
-    musicBtn.textContent = musicaActiva ? '🔊' : '🔇';
-
-    if (musicaActiva) {
-      reproducirMelodia();
-    } else {
-      nodos.forEach(n => { try { n.stop(); } catch(e) {} });
-      nodos = [];
-    }
-  }
-
-  musicBtn.addEventListener('click', toggleMusica);
-
-  // Mostrar grimorio al cargar
-  renderGrimorio();
-  iniciar();
+  actualizarBadge();
 </script>
 </body>
 </html>
