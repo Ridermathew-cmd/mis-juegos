@@ -211,6 +211,14 @@
     </div>
 
     <div class="config-seccion">
+      <div class="config-label">PIN de 4 dígitos</div>
+      <input type="password" id="input-pin" maxlength="4" inputmode="numeric" placeholder="Elige un PIN para proteger tu nombre..."
+        style="width:100%; padding:12px 14px; border-radius:10px; border:1px solid #3d2f7a;
+               background:#2a1f5e; color:#e8d5a3; font-size:16px; outline:none; letter-spacing:6px;" />
+      <div id="pin-estado" style="font-size:12px; color:#9b8ec4; margin-top:8px; min-height:18px;"></div>
+    </div>
+
+    <div class="config-seccion">
       <div class="config-label">Cantidad de cartas</div>
       <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
         <span style="color:#9b8ec4; font-size:13px;">6</span>
@@ -288,7 +296,7 @@
     { emoji:'🕊️', nombre:'Reparo',             precio:30,  desc:'Repara objetos rotos como si nunca se hubieran roto.' },
   ];
 
-  let config = JSON.parse(localStorage.getItem('config') || '{"pares":7,"velocidad":"normal","nombre":""}');
+  let config = JSON.parse(localStorage.getItem('config') || '{"pares":7,"velocidad":"normal","nombre":"","pin":""}');
   let hechizosDesbloqueados = JSON.parse(localStorage.getItem('hechizos') || '[]');
   let galeones = parseInt(localStorage.getItem('galeones') || '0');
   let ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
@@ -489,6 +497,7 @@
 
   async function guardarEnRanking(ganados) {
     const nombre = config.nombre || 'Anonimo';
+    const pin    = config.pin || '';
     const clave  = claveSegura(nombre);
     const url    = `${FB_URL}/${clave}.json`;
 
@@ -499,9 +508,18 @@
       entrada = await res.json();
     } catch(e) {}
 
+    // Si el nombre ya existe y tiene PIN, verificar que coincida
+    if (entrada && entrada.pin) {
+      if (entrada.pin !== pin) {
+        document.getElementById('win-msg').textContent =
+          'Ese nombre ya está en uso por otro jugador. Cambia tu nombre o PIN en Configuración.';
+        return;
+      }
+    }
+
     const nuevo = entrada
-      ? { nombre, galeones: entrada.galeones + ganados, partidas: entrada.partidas + 1, mejor: Math.min(entrada.mejor, intentos) }
-      : { nombre, galeones: ganados, partidas: 1, mejor: intentos };
+      ? { nombre, pin, galeones: entrada.galeones + ganados, partidas: entrada.partidas + 1, mejor: Math.min(entrada.mejor, intentos) }
+      : { nombre, pin, galeones: ganados, partidas: 1, mejor: intentos };
 
     // Guardar en Firebase
     try { await fetch(url, { method: 'PUT', body: JSON.stringify(nuevo) }); } catch(e) {}
@@ -614,12 +632,53 @@
 
   // Nombre del jugador
   const inputNombre = document.getElementById('input-nombre');
+  const inputPin    = document.getElementById('input-pin');
+  const pinEstado   = document.getElementById('pin-estado');
+
   inputNombre.value = config.nombre || '';
+  inputPin.value    = config.pin    || '';
+
   inputNombre.addEventListener('input', () => {
     config.nombre = inputNombre.value.trim();
     localStorage.setItem('config', JSON.stringify(config));
     actualizarSaludo();
+    validarPin();
   });
+
+  inputPin.addEventListener('input', () => {
+    config.pin = inputPin.value.trim();
+    localStorage.setItem('config', JSON.stringify(config));
+    validarPin();
+  });
+
+  async function validarPin() {
+    const nombre = config.nombre;
+    const pin    = config.pin;
+    if (!nombre) { pinEstado.textContent = ''; return; }
+    if (!pin)    { pinEstado.textContent = 'Elige un PIN para proteger tu nombre.'; pinEstado.style.color = '#9b8ec4'; return; }
+    if (pin.length < 4) { pinEstado.textContent = 'El PIN debe tener 4 dígitos.'; pinEstado.style.color = '#9b8ec4'; return; }
+
+    const clave = claveSegura(nombre);
+    try {
+      const res    = await fetch(`${FB_URL}/${clave}.json`);
+      const entrada = await res.json();
+      if (!entrada) {
+        pinEstado.textContent = 'Nombre disponible. PIN guardado.';
+        pinEstado.style.color = '#5a9e6f';
+      } else if (entrada.pin === pin) {
+        pinEstado.textContent = 'PIN correcto. Nombre verificado.';
+        pinEstado.style.color = '#5a9e6f';
+      } else {
+        pinEstado.textContent = 'PIN incorrecto. Este nombre pertenece a otro jugador.';
+        pinEstado.style.color = '#e05555';
+      }
+    } catch(e) {
+      pinEstado.textContent = 'No se pudo verificar (sin conexión).';
+      pinEstado.style.color = '#9b8ec4';
+    }
+  }
+
+  validarPin();
 
   function actualizarSaludo() {
     const n = config.nombre;
