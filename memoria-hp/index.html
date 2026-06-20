@@ -18,7 +18,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 12px;
+      padding: 20px 12px 40px;
     }
 
     h1 {
@@ -35,7 +35,6 @@
       margin-bottom: 20px;
     }
 
-    /* Marcador */
     .stats {
       display: flex;
       gap: 12px;
@@ -63,7 +62,6 @@
       margin-top: 2px;
     }
 
-    /* Grilla de cartas */
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -73,7 +71,6 @@
       margin-bottom: 20px;
     }
 
-    /* Cada carta tiene un contenedor que gira */
     .card {
       aspect-ratio: 1;
       cursor: pointer;
@@ -89,7 +86,6 @@
       border-radius: 10px;
     }
 
-    /* Cuando la carta está volteada, giramos el inner */
     .card.flipped .card-inner {
       transform: rotateY(180deg);
     }
@@ -107,14 +103,12 @@
       -webkit-backface-visibility: hidden;
     }
 
-    /* Dorso: morado oscuro con rayo */
     .card-back {
       background: #3C3489;
       border: 2px solid #534AB7;
       font-size: 24px;
     }
 
-    /* Frente: claro con el emoji */
     .card-front {
       background: #f5f0ff;
       border: 2px solid #9b8ec4;
@@ -122,18 +116,15 @@
       transform: rotateY(180deg);
     }
 
-    /* Carta encontrada */
     .card.matched .card-front {
       background: #d4edda;
       border-color: #5a9e6f;
     }
 
-    /* Carta bloqueada (no se puede clickear) */
     .card.blocked {
       pointer-events: none;
     }
 
-    /* Botón reiniciar */
     .btn-restart {
       background: #3C3489;
       color: #e8d5a3;
@@ -154,7 +145,7 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-top: 12px;
       animation: fadeIn 0.5s ease;
     }
@@ -175,9 +166,110 @@
       text-align: center;
     }
 
+    /* Hechizo desbloqueado */
+    .spell-unlock {
+      background: #2a1f5e;
+      border: 1px solid #e8d5a3;
+      border-radius: 12px;
+      padding: 14px 20px;
+      text-align: center;
+      max-width: 300px;
+      animation: aparecer 0.6s ease;
+    }
+
+    .spell-unlock-label {
+      font-size: 11px;
+      color: #9b8ec4;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .spell-name {
+      font-size: 20px;
+      color: #e8d5a3;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .spell-desc {
+      font-size: 13px;
+      color: #b8a9d9;
+      line-height: 1.5;
+    }
+
+    /* Grimorio — colección de hechizos */
+    .grimorio {
+      margin-top: 28px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .grimorio-title {
+      color: #e8d5a3;
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .grimorio-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .spell-card {
+      background: #2a1f5e;
+      border: 1px solid #3d2f7a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: aparecer 0.4s ease;
+    }
+
+    .spell-card-emoji {
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .spell-card-info {
+      flex: 1;
+    }
+
+    .spell-card-name {
+      font-size: 14px;
+      color: #e8d5a3;
+      font-weight: 600;
+    }
+
+    .spell-card-desc {
+      font-size: 12px;
+      color: #9b8ec4;
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .grimorio-empty {
+      color: #534AB7;
+      font-size: 13px;
+      text-align: center;
+      padding: 16px;
+      border: 1px dashed #3d2f7a;
+      border-radius: 10px;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: scale(0.95); }
+      to   { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
@@ -208,31 +300,66 @@
   <div class="win-screen" id="win-screen">
     <div class="win-title">🎉 ¡Expecto Patronum!</div>
     <div class="win-msg" id="win-msg"></div>
+    <div class="spell-unlock" id="spell-unlock">
+      <div class="spell-unlock-label">✨ Hechizo desbloqueado</div>
+      <div class="spell-name" id="spell-name"></div>
+      <div class="spell-desc" id="spell-desc"></div>
+    </div>
+  </div>
+
+  <!-- Grimorio: colección de hechizos conseguidos -->
+  <div class="grimorio" id="grimorio">
+    <div class="grimorio-title">📖 Tu Grimorio</div>
+    <div class="grimorio-grid" id="grimorio-grid"></div>
   </div>
 
 <script>
-  // ── Emojis del juego (8 pares = 16 cartas) ──────────────────────────
   const EMOJIS = ['🧙', '🦉', '🪄', '🎩', '🧹', '🫧', '📖', '⚡'];
 
-  // ── Estado del juego ─────────────────────────────────────────────────
-  let cartas = [];          // lista de objetos carta
-  let voltedas = [];        // cartas volteadas esperando comparación
+  // Lista de hechizos disponibles para desbloquear
+  const HECHIZOS = [
+    { emoji: '✨', nombre: 'Lumos',          desc: 'Ilumina la punta de tu varita en la oscuridad.' },
+    { emoji: '🌀', nombre: 'Wingardium Leviosa', desc: 'Hace levitar objetos con un simple movimiento.' },
+    { emoji: '🛡️', nombre: 'Protego',        desc: 'Crea un escudo mágico que bloquea hechizos.' },
+    { emoji: '🔥', nombre: 'Incendio',        desc: 'Lanza una llama directamente desde tu varita.' },
+    { emoji: '❄️', nombre: 'Glacius',         desc: 'Congela al objetivo con un chorro de hielo.' },
+    { emoji: '💨', nombre: 'Ventus',          desc: 'Genera una ráfaga de viento poderosa.' },
+    { emoji: '🌿', nombre: 'Herbivicus',      desc: 'Hace crecer plantas a una velocidad increíble.' },
+    { emoji: '⚡', nombre: 'Expelliarmus',    desc: 'El hechizo desarmador favorito de Harry Potter.' },
+    { emoji: '🌟', nombre: 'Expecto Patronum',desc: 'Invoca un Patronus para ahuyentar a los Dementores.' },
+    { emoji: '🔮', nombre: 'Revelio',         desc: 'Revela objetos, personas o secretos ocultos.' },
+    { emoji: '🦋', nombre: 'Alohomora',       desc: 'Abre cualquier cerradura con un toque de varita.' },
+    { emoji: '🌙', nombre: 'Nox',             desc: 'Apaga la luz de tu varita encendida con Lumos.' },
+    { emoji: '💫', nombre: 'Accio',           desc: 'Llama cualquier objeto hacia tus manos al instante.' },
+    { emoji: '🎭', nombre: 'Riddikulus',      desc: 'Transforma a un Boggart en algo gracioso e inofensivo.' },
+    { emoji: '🕊️', nombre: 'Reparo',          desc: 'Repara objetos rotos como si nunca se hubieran roto.' },
+  ];
+
+  // Estado del juego
+  let cartas = [];
+  let voltedas = [];
   let parejas = 0;
   let intentos = 0;
-  let bloqueado = false;    // impide voltear mientras comparamos
+  let bloqueado = false;
   let segundos = 0;
   let intervalo = null;
 
-  // ── Referencias al DOM ───────────────────────────────────────────────
-  const grid       = document.getElementById('grid');
-  const elIntentos = document.getElementById('intentos');
-  const elParejas  = document.getElementById('parejas');
-  const elTiempo   = document.getElementById('tiempo');
-  const winScreen  = document.getElementById('win-screen');
-  const winMsg     = document.getElementById('win-msg');
-  const btnRestart = document.getElementById('btn-restart');
+  // Hechizos guardados en localStorage (persisten entre sesiones)
+  let hechizosDesbloqueados = JSON.parse(localStorage.getItem('hechizos') || '[]');
 
-  // ── Mezclar array (algoritmo Fisher-Yates) ───────────────────────────
+  // Referencias al DOM
+  const grid          = document.getElementById('grid');
+  const elIntentos    = document.getElementById('intentos');
+  const elParejas     = document.getElementById('parejas');
+  const elTiempo      = document.getElementById('tiempo');
+  const winScreen     = document.getElementById('win-screen');
+  const winMsg        = document.getElementById('win-msg');
+  const btnRestart    = document.getElementById('btn-restart');
+  const spellUnlock   = document.getElementById('spell-unlock');
+  const elSpellName   = document.getElementById('spell-name');
+  const elSpellDesc   = document.getElementById('spell-desc');
+  const grimorioGrid  = document.getElementById('grimorio-grid');
+
   function mezclar(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
@@ -242,16 +369,41 @@
     return a;
   }
 
-  // ── Formatear segundos como M:SS ─────────────────────────────────────
   function formatTiempo(s) {
     const m = Math.floor(s / 60);
     const ss = String(s % 60).padStart(2, '0');
     return `${m}:${ss}`;
   }
 
-  // ── Iniciar / reiniciar el juego ─────────────────────────────────────
+  // Devuelve un hechizo que todavía no fue desbloqueado, o null si ya los tenés todos
+  function hechizoPendiente() {
+    const nombres = hechizosDesbloqueados.map(h => h.nombre);
+    const pendientes = HECHIZOS.filter(h => !nombres.includes(h.nombre));
+    if (pendientes.length === 0) return null;
+    return pendientes[Math.floor(Math.random() * pendientes.length)];
+  }
+
+  // Renderiza el grimorio completo
+  function renderGrimorio() {
+    if (hechizosDesbloqueados.length === 0) {
+      grimorioGrid.innerHTML = '<div class="grimorio-empty">Ganá una partida para desbloquear tu primer hechizo.</div>';
+      return;
+    }
+    grimorioGrid.innerHTML = '';
+    hechizosDesbloqueados.forEach(h => {
+      const el = document.createElement('div');
+      el.className = 'spell-card';
+      el.innerHTML = `
+        <div class="spell-card-emoji">${h.emoji}</div>
+        <div class="spell-card-info">
+          <div class="spell-card-name">${h.nombre}</div>
+          <div class="spell-card-desc">${h.desc}</div>
+        </div>`;
+      grimorioGrid.appendChild(el);
+    });
+  }
+
   function iniciar() {
-    // Limpiar estado
     voltedas = [];
     parejas = 0;
     intentos = 0;
@@ -259,43 +411,36 @@
     segundos = 0;
     clearInterval(intervalo);
 
-    // Resetear UI
     elIntentos.textContent = '0';
     elParejas.textContent = '0';
     elTiempo.textContent = '0:00';
     winScreen.classList.remove('visible');
+    spellUnlock.style.display = 'none';
     grid.innerHTML = '';
 
-    // Crear 16 cartas (cada emoji × 2) y mezclarlas
     cartas = mezclar([...EMOJIS, ...EMOJIS]);
 
-    // Generar HTML de cada carta
     cartas.forEach((emoji, i) => {
       const card = document.createElement('div');
       card.className = 'card';
       card.dataset.emoji = emoji;
       card.dataset.index = i;
-
       card.innerHTML = `
         <div class="card-inner">
           <div class="card-back">⚡</div>
           <div class="card-front">${emoji}</div>
         </div>`;
-
       card.addEventListener('click', () => voltear(card));
       grid.appendChild(card);
     });
 
-    // Arrancar temporizador
     intervalo = setInterval(() => {
       segundos++;
       elTiempo.textContent = formatTiempo(segundos);
     }, 1000);
   }
 
-  // ── Voltear una carta ────────────────────────────────────────────────
   function voltear(card) {
-    // Ignorar si está bloqueada, ya volteada o ya encontrada
     if (bloqueado) return;
     if (card.classList.contains('flipped')) return;
     if (card.classList.contains('matched')) return;
@@ -303,7 +448,6 @@
     card.classList.add('flipped');
     voltedas.push(card);
 
-    // Cuando hay 2 cartas volteadas, comparamos
     if (voltedas.length === 2) {
       intentos++;
       elIntentos.textContent = intentos;
@@ -311,13 +455,11 @@
     }
   }
 
-  // ── Comparar las dos cartas volteadas ────────────────────────────────
   function comparar() {
     const [a, b] = voltedas;
     const sonPareja = a.dataset.emoji === b.dataset.emoji;
 
     if (sonPareja) {
-      // Marcar como encontradas
       a.classList.add('matched', 'blocked');
       b.classList.add('matched', 'blocked');
       voltedas = [];
@@ -328,7 +470,6 @@
         ganar();
       }
     } else {
-      // No son pareja: bloquear y voltear de nuevo tras 1 segundo
       bloqueado = true;
       setTimeout(() => {
         a.classList.remove('flipped');
@@ -339,17 +480,33 @@
     }
   }
 
-  // ── Victoria ─────────────────────────────────────────────────────────
   function ganar() {
     clearInterval(intervalo);
     winMsg.textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
     winScreen.classList.add('visible');
+
+    // Desbloquear un hechizo nuevo
+    const nuevo = hechizoPendiente();
+    if (nuevo) {
+      hechizosDesbloqueados.push(nuevo);
+      localStorage.setItem('hechizos', JSON.stringify(hechizosDesbloqueados));
+      elSpellName.textContent = `${nuevo.emoji} ${nuevo.nombre}`;
+      elSpellDesc.textContent = nuevo.desc;
+      spellUnlock.style.display = 'block';
+    } else {
+      // Ya los desbloqueó todos
+      spellUnlock.style.display = 'block';
+      elSpellName.textContent = '🏆 ¡Maestro Mago!';
+      elSpellDesc.textContent = 'Ya desbloqueaste todos los hechizos del grimorio.';
+    }
+
+    renderGrimorio();
   }
 
-  // ── Eventos ──────────────────────────────────────────────────────────
   btnRestart.addEventListener('click', iniciar);
 
-  // Arrancar al cargar la página
+  // Mostrar grimorio al cargar
+  renderGrimorio();
   iniciar();
 </script>
 </body>
