@@ -17,258 +17,136 @@
       padding: 20px 12px 40px;
     }
 
-    /* ── Pantallas ── */
     .pantalla { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; }
     .pantalla.activa { display: flex; animation: fadeIn 0.4s ease; }
 
-    /* ── Menú principal ── */
-    .menu-logo {
-      font-size: 64px;
-      margin-bottom: 12px;
-      margin-top: 40px;
-      animation: flotar 3s ease-in-out infinite;
+    /* ── Menú ── */
+    .menu-logo { font-size: 64px; margin-bottom: 12px; margin-top: 40px; animation: flotar 3s ease-in-out infinite; }
+    .menu-titulo { font-size: 28px; font-weight: 700; color: #e8d5a3; letter-spacing: 2px; margin-bottom: 4px; text-align: center; }
+    .menu-subtitulo { font-size: 13px; color: #9b8ec4; margin-bottom: 16px; text-align: center; }
+
+    .galeones-display {
+      background: #2a1f5e;
+      border: 1px solid #c9a84c;
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-size: 15px;
+      color: #c9a84c;
+      font-weight: 600;
+      margin-bottom: 32px;
     }
 
-    .menu-titulo {
-      font-size: 28px;
-      font-weight: 700;
-      color: #e8d5a3;
-      letter-spacing: 2px;
-      margin-bottom: 4px;
-      text-align: center;
-    }
-
-    .menu-subtitulo {
-      font-size: 13px;
-      color: #9b8ec4;
-      margin-bottom: 48px;
-      text-align: center;
-    }
-
-    .menu-botones {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      width: 100%;
-    }
+    .menu-botones { display: flex; flex-direction: column; gap: 14px; width: 100%; }
 
     .btn-menu {
-      width: 100%;
-      padding: 16px;
-      border-radius: 14px;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      width: 100%; padding: 16px; border-radius: 14px;
+      font-size: 17px; font-weight: 600; cursor: pointer; border: none;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
       transition: transform 0.15s, opacity 0.15s;
     }
-
     .btn-menu:active { transform: scale(0.97); opacity: 0.85; }
+    .btn-jugar { background: #e8d5a3; color: #1a1040; }
+    .btn-config { background: #2a1f5e; color: #e8d5a3; border: 1px solid #534AB7; }
+    .btn-tienda { background: #2a1f5e; color: #c9a84c; border: 1px solid #c9a84c; }
+    .btn-musica { background: #2a1f5e; color: #e8d5a3; border: 1px solid #534AB7; }
 
-    .btn-jugar {
-      background: #e8d5a3;
-      color: #1a1040;
-    }
+    /* ── Títulos de pantalla ── */
+    .config-titulo { font-size: 20px; font-weight: 700; color: #e8d5a3; margin-bottom: 24px; margin-top: 20px; }
 
-    .btn-config {
-      background: #2a1f5e;
-      color: #e8d5a3;
-      border: 1px solid #534AB7;
-    }
-
-    .btn-musica {
-      background: #2a1f5e;
-      color: #e8d5a3;
-      border: 1px solid #534AB7;
-    }
-
-    .menu-hechizos-badge {
-      margin-top: 32px;
-      font-size: 12px;
-      color: #534AB7;
-    }
-
-    /* ── Pantalla de configuración ── */
-    .config-titulo {
-      font-size: 20px;
-      font-weight: 700;
-      color: #e8d5a3;
-      margin-bottom: 24px;
-      margin-top: 20px;
-    }
-
-    .config-seccion {
-      width: 100%;
-      margin-bottom: 20px;
-    }
-
-    .config-label {
-      font-size: 12px;
-      color: #9b8ec4;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-    }
-
-    .config-opciones {
-      display: flex;
-      gap: 10px;
-    }
-
+    /* ── Config ── */
+    .config-seccion { width: 100%; margin-bottom: 20px; }
+    .config-label { font-size: 12px; color: #9b8ec4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .config-opciones { display: flex; gap: 10px; }
     .btn-opcion {
-      flex: 1;
-      padding: 12px 8px;
-      border-radius: 10px;
-      border: 1px solid #3d2f7a;
-      background: #2a1f5e;
-      color: #9b8ec4;
-      font-size: 14px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
+      flex: 1; padding: 12px 8px; border-radius: 10px;
+      border: 1px solid #3d2f7a; background: #2a1f5e;
+      color: #9b8ec4; font-size: 14px; cursor: pointer; text-align: center; transition: all 0.2s;
     }
-
-    .btn-opcion.seleccionado {
-      border-color: #e8d5a3;
-      color: #e8d5a3;
-      background: #3C3489;
-    }
+    .btn-opcion.seleccionado { border-color: #e8d5a3; color: #e8d5a3; background: #3C3489; }
 
     .btn-volver {
-      margin-top: 10px;
-      padding: 14px 32px;
-      border-radius: 12px;
-      border: 1px solid #534AB7;
-      background: transparent;
-      color: #9b8ec4;
-      font-size: 15px;
-      cursor: pointer;
-      transition: color 0.2s;
+      margin-top: 10px; padding: 14px 32px; border-radius: 12px;
+      border: 1px solid #534AB7; background: transparent;
+      color: #9b8ec4; font-size: 15px; cursor: pointer; transition: color 0.2s;
     }
-
     .btn-volver:hover { color: #e8d5a3; }
 
-    /* ── Pantalla de juego ── */
-    .juego-header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
+    /* ── Tienda ── */
+    .tienda-saldo {
+      background: #2a1f5e; border: 1px solid #c9a84c;
+      border-radius: 12px; padding: 10px 24px;
+      font-size: 16px; color: #c9a84c; font-weight: 600;
+      margin-bottom: 20px; text-align: center;
     }
 
-    .btn-menu-juego {
-      background: transparent;
-      border: 1px solid #3d2f7a;
-      border-radius: 8px;
-      color: #9b8ec4;
-      font-size: 13px;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
+    .tienda-lista { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-    .juego-titulo {
-      font-size: 16px;
-      font-weight: 600;
-      color: #e8d5a3;
+    .tienda-item {
+      background: #2a1f5e; border: 1px solid #3d2f7a;
+      border-radius: 12px; padding: 12px 14px;
+      display: flex; align-items: center; gap: 12px;
     }
+    .tienda-item.comprado { border-color: #5a9e6f; opacity: 0.6; }
 
-    .stats {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 16px;
-      width: 100%;
+    .tienda-emoji { font-size: 24px; flex-shrink: 0; }
+    .tienda-info { flex: 1; }
+    .tienda-nombre { font-size: 14px; color: #e8d5a3; font-weight: 600; }
+    .tienda-desc { font-size: 12px; color: #9b8ec4; margin-top: 2px; line-height: 1.3; }
+
+    .btn-comprar {
+      background: #c9a84c; color: #1a1040;
+      border: none; border-radius: 8px;
+      padding: 7px 12px; font-size: 13px; font-weight: 700;
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: opacity 0.2s;
     }
+    .btn-comprar:disabled { background: #3d2f7a; color: #534AB7; cursor: default; }
+    .btn-comprar.ya-tiene { background: #5a9e6f; color: #fff; cursor: default; }
 
-    .stat-box {
-      flex: 1;
-      background: #2a1f5e;
-      border: 1px solid #3d2f7a;
-      border-radius: 10px;
-      padding: 8px 4px;
-      text-align: center;
-    }
+    /* ── Juego ── */
+    .juego-header { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .btn-menu-juego { background: transparent; border: 1px solid #3d2f7a; border-radius: 8px; color: #9b8ec4; font-size: 13px; padding: 6px 12px; cursor: pointer; }
+    .juego-titulo { font-size: 16px; font-weight: 600; color: #e8d5a3; }
 
+    .stats { display: flex; gap: 10px; margin-bottom: 16px; width: 100%; }
+    .stat-box { flex: 1; background: #2a1f5e; border: 1px solid #3d2f7a; border-radius: 10px; padding: 8px 4px; text-align: center; }
     .stat-value { font-size: 20px; font-weight: 600; color: #e8d5a3; }
     .stat-label { font-size: 10px; color: #9b8ec4; margin-top: 2px; }
 
-    .grid {
-      display: grid;
-      gap: 10px;
-      width: 100%;
-      margin-bottom: 16px;
-    }
-
+    .grid { display: grid; gap: 10px; width: 100%; margin-bottom: 16px; }
     .grid-4 { grid-template-columns: repeat(4, 1fr); }
     .grid-3 { grid-template-columns: repeat(3, 1fr); }
 
     .card { aspect-ratio: 1; cursor: pointer; perspective: 600px; }
-
-    .card-inner {
-      width: 100%; height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.4s ease;
-      border-radius: 10px;
-    }
-
+    .card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.4s ease; border-radius: 10px; }
     .card.flipped .card-inner { transform: rotateY(180deg); }
-
-    .card-front, .card-back {
-      position: absolute; width: 100%; height: 100%;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
+    .card-front, .card-back { position: absolute; width: 100%; height: 100%; border-radius: 10px; display: flex; align-items: center; justify-content: center; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
     .card-back { background: #3C3489; border: 2px solid #534AB7; font-size: 24px; }
     .card-front { background: #f5f0ff; border: 2px solid #9b8ec4; font-size: 32px; transform: rotateY(180deg); }
     .card.matched .card-front { background: #d4edda; border-color: #5a9e6f; }
     .card.blocked { pointer-events: none; }
 
-    .btn-restart {
-      background: #3C3489; color: #e8d5a3;
-      border: 1px solid #534AB7; border-radius: 10px;
-      padding: 12px 32px; font-size: 15px;
-      cursor: pointer; transition: background 0.2s;
-    }
+    .btn-restart { background: #3C3489; color: #e8d5a3; border: 1px solid #534AB7; border-radius: 10px; padding: 12px 32px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
     .btn-restart:hover { background: #534AB7; }
 
     /* ── Victoria ── */
-    .win-screen {
-      display: none; flex-direction: column; align-items: center;
-      gap: 10px; margin-top: 12px; animation: fadeIn 0.5s ease;
-    }
+    .win-screen { display: none; flex-direction: column; align-items: center; gap: 10px; margin-top: 12px; animation: fadeIn 0.5s ease; }
     .win-screen.visible { display: flex; }
     .win-title { font-size: 26px; color: #e8d5a3; font-weight: 700; }
     .win-msg { color: #9b8ec4; font-size: 13px; text-align: center; }
 
-    .spell-unlock {
-      background: #2a1f5e; border: 1px solid #e8d5a3;
-      border-radius: 12px; padding: 14px 20px;
-      text-align: center; max-width: 300px;
-      animation: aparecer 0.6s ease;
+    .galeones-ganados {
+      background: #2a1f5e; border: 1px solid #c9a84c;
+      border-radius: 12px; padding: 10px 20px;
+      font-size: 18px; color: #c9a84c; font-weight: 700;
+      text-align: center; animation: aparecer 0.5s ease;
     }
-    .spell-unlock-label { font-size: 11px; color: #9b8ec4; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-    .spell-name { font-size: 20px; color: #e8d5a3; font-weight: 600; margin-bottom: 4px; }
-    .spell-desc { font-size: 13px; color: #b8a9d9; line-height: 1.5; }
 
     /* ── Grimorio ── */
     .grimorio { margin-top: 28px; width: 100%; max-width: 360px; }
     .grimorio-title { color: #e8d5a3; font-size: 15px; font-weight: 600; margin-bottom: 12px; text-align: center; }
     .grimorio-grid { display: flex; flex-direction: column; gap: 8px; }
-
-    .spell-card {
-      background: #2a1f5e; border: 1px solid #3d2f7a;
-      border-radius: 10px; padding: 10px 14px;
-      display: flex; align-items: center; gap: 12px;
-      animation: aparecer 0.4s ease;
-    }
+    .spell-card { background: #2a1f5e; border: 1px solid #3d2f7a; border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; animation: aparecer 0.4s ease; }
     .spell-card-emoji { font-size: 22px; flex-shrink: 0; }
     .spell-card-name { font-size: 14px; color: #e8d5a3; font-weight: 600; }
     .spell-card-desc { font-size: 12px; color: #9b8ec4; margin-top: 2px; line-height: 1.4; }
@@ -286,15 +164,23 @@
     <div class="menu-logo">⚡</div>
     <div class="menu-titulo">Memoria Mágica</div>
     <div class="menu-subtitulo">Juego de parejas Harry Potter</div>
+    <div class="galeones-display" id="menu-galeones">🪙 0 galeones</div>
 
     <div class="menu-botones">
-      <button class="btn-menu btn-jugar" id="btn-jugar">🧙 Jugar</button>
-      <button class="btn-menu btn-config" id="btn-ir-config">⚙️ Configuración</button>
-      <button class="btn-menu btn-musica" id="btn-musica-menu">🔇 Música: Apagada</button>
-      <button class="btn-menu btn-config" id="btn-ir-hechizos">📖 Tus hechizos</button>
+      <button class="btn-menu btn-jugar"   id="btn-jugar">🧙 Jugar</button>
+      <button class="btn-menu btn-tienda"  id="btn-ir-tienda">🏪 Tienda de hechizos</button>
+      <button class="btn-menu btn-config"  id="btn-ir-hechizos">📖 Tus hechizos</button>
+      <button class="btn-menu btn-config"  id="btn-ir-config">⚙️ Configuración</button>
+      <button class="btn-menu btn-musica"  id="btn-musica-menu">🔇 Música: Apagada</button>
     </div>
+  </div>
 
-    <div class="menu-hechizos-badge" id="badge-hechizos"></div>
+  <!-- ══ TIENDA ══ -->
+  <div class="pantalla" id="pantalla-tienda">
+    <div class="config-titulo">🏪 Tienda de hechizos</div>
+    <div class="tienda-saldo" id="tienda-saldo">🪙 0 galeones disponibles</div>
+    <div class="tienda-lista" id="tienda-lista"></div>
+    <button class="btn-volver" id="btn-volver-tienda">← Volver al menú</button>
   </div>
 
   <!-- ══ HECHIZOS ══ -->
@@ -312,12 +198,11 @@
       <div class="config-label">Cantidad de cartas</div>
       <div style="display:flex; align-items:center; gap:14px; margin-top:4px;">
         <span style="color:#9b8ec4; font-size:13px;">6</span>
-        <input type="range" id="slider-cartas" min="3" max="10" step="1" style="flex:1;"
-               value="8" />
+        <input type="range" id="slider-cartas" min="3" max="10" step="1" style="flex:1;" value="7" />
         <span style="color:#9b8ec4; font-size:13px;">20</span>
       </div>
       <div style="text-align:center; margin-top:10px;">
-        <span id="cartas-valor" style="font-size:22px; font-weight:600; color:#e8d5a3;">16</span>
+        <span id="cartas-valor" style="font-size:22px; font-weight:600; color:#e8d5a3;">14</span>
         <span style="font-size:13px; color:#9b8ec4;"> cartas</span>
       </div>
     </div>
@@ -339,7 +224,7 @@
     <div class="juego-header">
       <button class="btn-menu-juego" id="btn-volver-juego">← Menú</button>
       <div class="juego-titulo">⚡ Memoria Mágica</div>
-      <div style="width:60px"></div>
+      <div style="font-size:13px; color:#c9a84c; font-weight:600;" id="juego-galeones">🪙 0</div>
     </div>
 
     <div class="stats">
@@ -355,66 +240,56 @@
     <div class="win-screen" id="win-screen">
       <div class="win-title">🎉 ¡Expecto Patronum!</div>
       <div class="win-msg" id="win-msg"></div>
-      <div class="spell-unlock" id="spell-unlock" style="display:none">
-        <div class="spell-unlock-label">✨ Hechizo desbloqueado</div>
-        <div class="spell-name" id="spell-name"></div>
-        <div class="spell-desc" id="spell-desc"></div>
-      </div>
+      <div class="galeones-ganados" id="galeones-ganados"></div>
       <button class="btn-restart" id="btn-jugar-de-nuevo">Jugar de nuevo</button>
       <button class="btn-volver" id="btn-win-menu">Ir al menú</button>
     </div>
 
-    <div class="grimorio" id="grimorio">
+    <div class="grimorio">
       <div class="grimorio-title">📖 Tu Grimorio</div>
       <div class="grimorio-grid" id="grimorio-grid"></div>
     </div>
   </div>
 
 <script>
-  // ── Datos ────────────────────────────────────────────────────────────
   const EMOJIS_TODOS = ['🧙','🦉','🪄','🎩','🧹','🫧','📖','⚡','🐍','🦁','🦅','🦡','🔮','💊','🌙'];
 
   const HECHIZOS = [
-    { emoji:'✨', nombre:'Lumos',             desc:'Ilumina la punta de tu varita en la oscuridad.' },
-    { emoji:'🌀', nombre:'Wingardium Leviosa',desc:'Hace levitar objetos con un simple movimiento.' },
-    { emoji:'🛡️', nombre:'Protego',           desc:'Crea un escudo mágico que bloquea hechizos.' },
-    { emoji:'🔥', nombre:'Incendio',           desc:'Lanza una llama directamente desde tu varita.' },
-    { emoji:'❄️', nombre:'Glacius',            desc:'Congela al objetivo con un chorro de hielo.' },
-    { emoji:'💨', nombre:'Ventus',             desc:'Genera una ráfaga de viento poderosa.' },
-    { emoji:'🌿', nombre:'Herbivicus',         desc:'Hace crecer plantas a una velocidad increíble.' },
-    { emoji:'⚡', nombre:'Expelliarmus',       desc:'El hechizo desarmador favorito de Harry Potter.' },
-    { emoji:'🌟', nombre:'Expecto Patronum',   desc:'Invoca un Patronus para ahuyentar a los Dementores.' },
-    { emoji:'🔮', nombre:'Revelio',            desc:'Revela objetos, personas o secretos ocultos.' },
-    { emoji:'🦋', nombre:'Alohomora',          desc:'Abre cualquier cerradura con un toque de varita.' },
-    { emoji:'🌙', nombre:'Nox',               desc:'Apaga la luz de tu varita encendida con Lumos.' },
-    { emoji:'💫', nombre:'Accio',             desc:'Llama cualquier objeto hacia tus manos al instante.' },
-    { emoji:'🎭', nombre:'Riddikulus',         desc:'Transforma a un Boggart en algo gracioso.' },
-    { emoji:'🕊️', nombre:'Reparo',            desc:'Repara objetos rotos como si nunca se hubieran roto.' },
+    { emoji:'✨', nombre:'Lumos',              precio:30,  desc:'Ilumina la punta de tu varita en la oscuridad.' },
+    { emoji:'🌀', nombre:'Wingardium Leviosa', precio:40,  desc:'Hace levitar objetos con un simple movimiento.' },
+    { emoji:'🛡️', nombre:'Protego',            precio:50,  desc:'Crea un escudo mágico que bloquea hechizos.' },
+    { emoji:'🔥', nombre:'Incendio',            precio:35,  desc:'Lanza una llama directamente desde tu varita.' },
+    { emoji:'❄️', nombre:'Glacius',             precio:35,  desc:'Congela al objetivo con un chorro de hielo.' },
+    { emoji:'💨', nombre:'Ventus',              precio:30,  desc:'Genera una ráfaga de viento poderosa.' },
+    { emoji:'🌿', nombre:'Herbivicus',          precio:25,  desc:'Hace crecer plantas a una velocidad increíble.' },
+    { emoji:'⚡', nombre:'Expelliarmus',        precio:60,  desc:'El hechizo desarmador favorito de Harry Potter.' },
+    { emoji:'🌟', nombre:'Expecto Patronum',    precio:100, desc:'Invoca un Patronus para ahuyentar a los Dementores.' },
+    { emoji:'🔮', nombre:'Revelio',             precio:45,  desc:'Revela objetos, personas o secretos ocultos.' },
+    { emoji:'🦋', nombre:'Alohomora',           precio:40,  desc:'Abre cualquier cerradura con un toque de varita.' },
+    { emoji:'🌙', nombre:'Nox',                precio:20,  desc:'Apaga la luz de tu varita encendida con Lumos.' },
+    { emoji:'💫', nombre:'Accio',              precio:55,  desc:'Llama cualquier objeto hacia tus manos al instante.' },
+    { emoji:'🎭', nombre:'Riddikulus',          precio:45,  desc:'Transforma a un Boggart en algo gracioso.' },
+    { emoji:'🕊️', nombre:'Reparo',             precio:30,  desc:'Repara objetos rotos como si nunca se hubieran roto.' },
   ];
 
-  // ── Configuración guardada ───────────────────────────────────────────
   let config = JSON.parse(localStorage.getItem('config') || '{"pares":7,"velocidad":"normal"}');
   let hechizosDesbloqueados = JSON.parse(localStorage.getItem('hechizos') || '[]');
+  let galeones = parseInt(localStorage.getItem('galeones') || '0');
 
   const VELOCIDAD_MS = { lenta: 700, normal: 400, rapida: 180 };
 
-  // ── Estado del juego ─────────────────────────────────────────────────
   let voltedas = [], parejas = 0, intentos = 0, bloqueado = false, segundos = 0, intervalo = null;
 
   // ── Música ───────────────────────────────────────────────────────────
   let audioCtx = null, musicaActiva = false, nodos = [];
   const MELODIA = [659,0,784,0,1047,988,784,0,1047,0,988,0,784,1047,988,0,880,0,698,0,932,880,698,0,698,0,659,0,784,0,659,0];
 
-  function crearCtx() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  function crearCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 
   function tocarNota(freq, inicio, dur) {
     if (!freq) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
     gain.gain.setValueAtTime(0, inicio);
     gain.gain.linearRampToValueAtTime(0.15, inicio + 0.05);
     gain.gain.exponentialRampToValueAtTime(0.001, inicio + dur);
@@ -434,13 +309,32 @@
     crearCtx();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     musicaActiva = !musicaActiva;
-    const txt = musicaActiva ? '🔊 Música: Encendida' : '🔇 Música: Apagada';
-    document.getElementById('btn-musica-menu').textContent = txt;
-    if (musicaActiva) { reproducirMelodia(); }
+    document.getElementById('btn-musica-menu').textContent = musicaActiva ? '🔊 Música: Encendida' : '🔇 Música: Apagada';
+    if (musicaActiva) reproducirMelodia();
     else { nodos.forEach(n => { try { n.stop(); } catch(e){} }); nodos = []; }
   }
 
-  // ── Navegación entre pantallas ───────────────────────────────────────
+  // ── Galeones ─────────────────────────────────────────────────────────
+  function calcularGaleones(intentosTotales, seg, numPares) {
+    const base = numPares * 10;
+    const bonus = Math.max(0, 20 - intentosTotales + numPares);
+    const tiempoBonus = seg < 60 ? 15 : seg < 120 ? 8 : 0;
+    return base + bonus + tiempoBonus;
+  }
+
+  function guardarGaleones() {
+    localStorage.setItem('galeones', galeones);
+    actualizarGaleonesUI();
+  }
+
+  function actualizarGaleonesUI() {
+    document.getElementById('menu-galeones').textContent = `🪙 ${galeones} galeones`;
+    document.getElementById('juego-galeones').textContent = `🪙 ${galeones}`;
+    const ts = document.getElementById('tienda-saldo');
+    if (ts) ts.textContent = `🪙 ${galeones} galeones disponibles`;
+  }
+
+  // ── Navegación ───────────────────────────────────────────────────────
   function mostrar(id) {
     document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
     document.getElementById(id).classList.add('activa');
@@ -456,20 +350,14 @@
     return a;
   }
 
-  function formatTiempo(s) {
-    return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
-  }
+  function formatTiempo(s) { return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
 
-  function hechizoPendiente() {
-    const nombres = hechizosDesbloqueados.map(h => h.nombre);
-    const pend = HECHIZOS.filter(h => !nombres.includes(h.nombre));
-    return pend.length ? pend[Math.floor(Math.random() * pend.length)] : null;
-  }
+  function tieneHechizo(nombre) { return hechizosDesbloqueados.some(h => h.nombre === nombre); }
 
   function renderGrimorio(targetId) {
     const grid = document.getElementById(targetId || 'grimorio-grid');
     if (!hechizosDesbloqueados.length) {
-      grid.innerHTML = '<div class="grimorio-empty">Ganá una partida para desbloquear tu primer hechizo.</div>';
+      grid.innerHTML = '<div class="grimorio-empty">Comprá o ganá tu primer hechizo en la tienda.</div>';
       return;
     }
     grid.innerHTML = '';
@@ -481,22 +369,51 @@
     });
   }
 
-  function actualizarBadge() {
-    const n = hechizosDesbloqueados.length;
-    document.getElementById('badge-hechizos').textContent =
-      n ? `📖 ${n} hechizo${n>1?'s':''} desbloqueado${n>1?'s':''}` : '';
+  // ── Tienda ───────────────────────────────────────────────────────────
+  function renderTienda() {
+    actualizarGaleonesUI();
+    const lista = document.getElementById('tienda-lista');
+    lista.innerHTML = '';
+    HECHIZOS.forEach(h => {
+      const tiene = tieneHechizo(h.nombre);
+      const puedePagar = galeones >= h.precio;
+      const item = document.createElement('div');
+      item.className = 'tienda-item' + (tiene ? ' comprado' : '');
+      item.innerHTML = `
+        <div class="tienda-emoji">${h.emoji}</div>
+        <div class="tienda-info">
+          <div class="tienda-nombre">${h.nombre}</div>
+          <div class="tienda-desc">${h.desc}</div>
+        </div>
+        <button class="btn-comprar${tiene ? ' ya-tiene' : ''}"
+          ${tiene ? 'disabled' : (!puedePagar ? 'disabled' : '')}
+          data-nombre="${h.nombre}">
+          ${tiene ? '✓ Tenés' : `🪙 ${h.precio}`}
+        </button>`;
+      lista.appendChild(item);
+    });
+
+    lista.querySelectorAll('.btn-comprar:not([disabled])').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const h = HECHIZOS.find(x => x.nombre === btn.dataset.nombre);
+        if (!h || galeones < h.precio) return;
+        galeones -= h.precio;
+        hechizosDesbloqueados.push(h);
+        localStorage.setItem('hechizos', JSON.stringify(hechizosDesbloqueados));
+        guardarGaleones();
+        renderTienda();
+      });
+    });
   }
 
   // ── Juego ────────────────────────────────────────────────────────────
   function iniciar() {
     voltedas = []; parejas = 0; intentos = 0; bloqueado = false; segundos = 0;
     clearInterval(intervalo);
-
     document.getElementById('intentos').textContent = '0';
     document.getElementById('parejas').textContent = '0';
     document.getElementById('tiempo').textContent = '0:00';
     document.getElementById('win-screen').classList.remove('visible');
-    document.getElementById('spell-unlock').style.display = 'none';
 
     const numPares = config.pares;
     const emojis = mezclar(EMOJIS_TODOS).slice(0, numPares);
@@ -521,6 +438,7 @@
     }, 1000);
 
     renderGrimorio();
+    actualizarGaleonesUI();
   }
 
   function voltear(card) {
@@ -535,54 +453,41 @@
     if (a.dataset.emoji === b.dataset.emoji) {
       a.classList.add('matched','blocked');
       b.classList.add('matched','blocked');
-      voltedas = [];
-      parejas++;
+      voltedas = []; parejas++;
       document.getElementById('parejas').textContent = parejas;
       if (parejas === config.pares) ganar();
     } else {
       bloqueado = true;
-      const vel = VELOCIDAD_MS[config.velocidad];
-      setTimeout(() => {
-        a.classList.remove('flipped'); b.classList.remove('flipped');
-        voltedas = []; bloqueado = false;
-      }, vel);
+      setTimeout(() => { a.classList.remove('flipped'); b.classList.remove('flipped'); voltedas = []; bloqueado = false; }, VELOCIDAD_MS[config.velocidad]);
     }
   }
 
   function ganar() {
     clearInterval(intervalo);
-    document.getElementById('win-msg').textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
-    document.getElementById('win-screen').classList.add('visible');
+    const ganados = calcularGaleones(intentos, segundos, config.pares);
+    galeones += ganados;
+    guardarGaleones();
 
-    const nuevo = hechizoPendiente();
-    const su = document.getElementById('spell-unlock');
-    su.style.display = 'block';
-    if (nuevo) {
-      hechizosDesbloqueados.push(nuevo);
-      localStorage.setItem('hechizos', JSON.stringify(hechizosDesbloqueados));
-      document.getElementById('spell-name').textContent = `${nuevo.emoji} ${nuevo.nombre}`;
-      document.getElementById('spell-desc').textContent = nuevo.desc;
-    } else {
-      document.getElementById('spell-name').textContent = '🏆 ¡Maestro Mago!';
-      document.getElementById('spell-desc').textContent = 'Ya desbloqueaste todos los hechizos del grimorio.';
-    }
+    document.getElementById('win-msg').textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
+    document.getElementById('galeones-ganados').textContent = `🪙 +${ganados} galeones ganados`;
+    document.getElementById('win-screen').classList.add('visible');
     renderGrimorio();
-    actualizarBadge();
   }
 
   // ── Eventos ──────────────────────────────────────────────────────────
   document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
+  document.getElementById('btn-ir-tienda').addEventListener('click', () => { mostrar('pantalla-tienda'); renderTienda(); });
   document.getElementById('btn-ir-config').addEventListener('click', () => mostrar('pantalla-config'));
   document.getElementById('btn-ir-hechizos').addEventListener('click', () => { mostrar('pantalla-hechizos'); renderGrimorio('grimorio-grid-menu'); });
-  document.getElementById('btn-volver-hechizos').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-musica-menu').addEventListener('click', toggleMusica);
+  document.getElementById('btn-volver-tienda').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-volver-config').addEventListener('click', () => mostrar('pantalla-menu'));
+  document.getElementById('btn-volver-hechizos').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-volver-juego').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
   document.getElementById('btn-restart').addEventListener('click', iniciar);
   document.getElementById('btn-jugar-de-nuevo').addEventListener('click', iniciar);
   document.getElementById('btn-win-menu').addEventListener('click', () => { clearInterval(intervalo); mostrar('pantalla-menu'); });
 
-  // Slider de cartas
   const slider = document.getElementById('slider-cartas');
   const cartasValor = document.getElementById('cartas-valor');
   slider.value = config.pares;
@@ -593,7 +498,6 @@
     localStorage.setItem('config', JSON.stringify(config));
   });
 
-  // Botones de configuración — velocidad
   document.querySelectorAll('[data-vel]').forEach(btn => {
     if (btn.dataset.vel === config.velocidad) btn.classList.add('seleccionado');
     btn.addEventListener('click', () => {
@@ -604,7 +508,7 @@
     });
   });
 
-  actualizarBadge();
+  actualizarGaleonesUI();
 </script>
 </body>
 </html>
