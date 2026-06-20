@@ -71,6 +71,28 @@
     }
     .btn-volver:hover { color: #e8d5a3; }
 
+    /* ── Tutorial ── */
+    .tutorial-paso {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: #2a1f5e; border: 1px solid #3d2f7a;
+      border-radius: 14px; padding: 16px;
+      animation: aparecer 0.4s ease both;
+    }
+    .tutorial-num {
+      min-width: 32px; height: 32px; border-radius: 50%;
+      background: #534AB7; color: #fff;
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .tutorial-titulo-paso { font-size: 15px; font-weight: 700; color: #e8d5a3; margin-bottom: 4px; }
+    .tutorial-desc { font-size: 13px; color: #9b8ec4; line-height: 1.6; }
+    .tutorial-demo {
+      margin-top: 8px; font-size: 20px; letter-spacing: 4px;
+      background: #1a1040; border-radius: 8px; padding: 6px 10px;
+      display: inline-block;
+    }
+
     /* ── Tienda ── */
     .tienda-saldo {
       background: #2a1f5e; border: 1px solid #c9a84c;
@@ -305,8 +327,65 @@
       <button class="btn-menu btn-config"  id="btn-ir-hechizos">📖 Tus hechizos</button>
       <button class="btn-menu btn-config"  id="btn-ir-config">⚙️ Configuración</button>
       <button class="btn-menu btn-config"  id="btn-ir-ranking">🏆 Ranking</button>
+      <button class="btn-menu btn-config"  id="btn-ir-tutorial">📜 Tutorial</button>
       <button class="btn-menu btn-musica"  id="btn-musica-menu">🔇 Música: Apagada</button>
     </div>
+  </div>
+
+  <!-- ══ TUTORIAL ══ -->
+  <div class="pantalla" id="pantalla-tutorial">
+    <div class="config-titulo">📜 Cómo jugar</div>
+
+    <div style="display:flex; flex-direction:column; gap:16px; width:100%; margin-bottom:28px;">
+
+      <div class="tutorial-paso">
+        <div class="tutorial-num">1</div>
+        <div>
+          <div class="tutorial-titulo-paso">Voltea las cartas</div>
+          <div class="tutorial-desc">Toca cualquier carta para darla vuelta y ver el símbolo que esconde.</div>
+          <div class="tutorial-demo">🃏 → ⚡</div>
+        </div>
+      </div>
+
+      <div class="tutorial-paso">
+        <div class="tutorial-num">2</div>
+        <div>
+          <div class="tutorial-titulo-paso">Encuentra la pareja</div>
+          <div class="tutorial-desc">Toca una segunda carta. Si tiene el mismo símbolo, ¡encontraste la pareja! Quedan descubiertas.</div>
+          <div class="tutorial-demo">⚡ + ⚡ = ✅</div>
+        </div>
+      </div>
+
+      <div class="tutorial-paso">
+        <div class="tutorial-num">3</div>
+        <div>
+          <div class="tutorial-titulo-paso">Si no coinciden</div>
+          <div class="tutorial-desc">Las dos cartas se vuelven a tapar. Memoriza dónde estaba cada símbolo.</div>
+          <div class="tutorial-demo">🧙 + 🦉 = ❌</div>
+        </div>
+      </div>
+
+      <div class="tutorial-paso">
+        <div class="tutorial-num">4</div>
+        <div>
+          <div class="tutorial-titulo-paso">Gana monedas y hechizos</div>
+          <div class="tutorial-desc">Al completar el tablero ganas galeones 🪙 según tu velocidad y precisión. Cada partida te otorga un hechizo nuevo del grimorio.</div>
+          <div class="tutorial-demo">🏆 → 🪙 + 🪄</div>
+        </div>
+      </div>
+
+      <div class="tutorial-paso">
+        <div class="tutorial-num">5</div>
+        <div>
+          <div class="tutorial-titulo-paso">Sube en el ranking</div>
+          <div class="tutorial-desc">Acumula galeones para superar a los demás jugadores y llegar al primer puesto.</div>
+          <div class="tutorial-demo">🥇 🥈 🥉</div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="btn-volver" id="btn-volver-tutorial">← Volver al menú</button>
   </div>
 
   <!-- ══ TIENDA ══ -->
@@ -831,6 +910,8 @@
   document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
   document.getElementById('btn-ir-tienda').addEventListener('click', () => { mostrar('pantalla-tienda'); renderTienda(); });
   document.getElementById('btn-ir-ranking').addEventListener('click', () => { mostrar('pantalla-ranking'); renderRanking(); });
+  document.getElementById('btn-ir-tutorial').addEventListener('click', () => mostrar('pantalla-tutorial'));
+  document.getElementById('btn-volver-tutorial').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-volver-ranking').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-ir-config').addEventListener('click', () => mostrar('pantalla-config'));
   document.getElementById('btn-ir-hechizos').addEventListener('click', () => { mostrar('pantalla-hechizos'); renderGrimorio('grimorio-grid-menu'); });
