@@ -260,6 +260,38 @@
     <div class="intro-toque">Toca para continuar</div>
   </div>
 
+  <!-- ══ BIENVENIDA (primer ingreso) ══ -->
+  <div id="pantalla-bienvenida" style="display:none; position:fixed; inset:0; background:#0d0820; z-index:998;
+       flex-direction:column; align-items:center; justify-content:center; padding:28px;">
+    <div style="font-size:48px; margin-bottom:12px;">⚡</div>
+    <div style="font-size:22px; font-weight:700; color:#e8d5a3; letter-spacing:1px; text-align:center; margin-bottom:6px;">Bienvenido a Memoria Mágica</div>
+    <div style="font-size:13px; color:#9b8ec4; text-align:center; margin-bottom:28px;">Antes de comenzar, cuéntanos quién eres</div>
+
+    <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:16px;">
+      <div>
+        <div style="font-size:13px; color:#c9a84c; font-weight:600; margin-bottom:8px;">Tu nombre</div>
+        <input type="text" id="bienvenida-nombre" maxlength="20" placeholder="Escribe tu nombre..."
+          style="width:100%; padding:13px 14px; border-radius:10px; border:1px solid #3d2f7a;
+                 background:#2a1f5e; color:#e8d5a3; font-size:16px; outline:none;" />
+      </div>
+      <div>
+        <div style="font-size:13px; color:#c9a84c; font-weight:600; margin-bottom:6px;">PIN de 4 dígitos</div>
+        <div style="font-size:12px; color:#9b8ec4; margin-bottom:8px; line-height:1.6;">
+          Clave secreta que protege tu nombre en el ranking. Solo tú la conoces.
+        </div>
+        <input type="password" id="bienvenida-pin" maxlength="4" inputmode="numeric" placeholder="Ejemplo: 1234"
+          style="width:100%; padding:13px 14px; border-radius:10px; border:1px solid #3d2f7a;
+                 background:#2a1f5e; color:#e8d5a3; font-size:16px; outline:none; letter-spacing:6px;" />
+      </div>
+      <button id="btn-bienvenida-ok"
+        style="width:100%; padding:15px; border-radius:14px; border:none; background:#e8d5a3;
+               color:#1a1040; font-size:17px; font-weight:700; cursor:pointer; margin-top:8px;">
+        ¡Empezar a jugar!
+      </button>
+      <div id="bienvenida-error" style="font-size:12px; color:#e05; text-align:center; min-height:16px;"></div>
+    </div>
+  </div>
+
   <!-- ══ MENÚ PRINCIPAL ══ -->
   <div class="pantalla activa" id="pantalla-menu">
     <div class="menu-logo">⚡</div>
@@ -493,12 +525,38 @@
   // ── Intro ────────────────────────────────────────────────────────────
   (function() {
     const intro = document.getElementById('intro');
+    const bienvenida = document.getElementById('pantalla-bienvenida');
+
     function cerrarIntro() {
       intro.classList.add('ocultar');
-      setTimeout(() => { intro.style.display = 'none'; }, 1000);
+      setTimeout(() => {
+        intro.style.display = 'none';
+        if (!config.nombre) {
+          bienvenida.style.display = 'flex';
+          document.getElementById('bienvenida-nombre').focus();
+        }
+      }, 1000);
     }
+
     intro.addEventListener('click', cerrarIntro);
     setTimeout(cerrarIntro, 3400);
+
+    document.getElementById('btn-bienvenida-ok').addEventListener('click', () => {
+      const nombre = document.getElementById('bienvenida-nombre').value.trim();
+      const pin    = document.getElementById('bienvenida-pin').value.trim();
+      const err    = document.getElementById('bienvenida-error');
+      if (!nombre) { err.textContent = 'Escribe tu nombre para continuar.'; return; }
+      if (pin.length > 0 && !/^\d{4}$/.test(pin)) { err.textContent = 'El PIN debe tener exactamente 4 números.'; return; }
+      err.textContent = '';
+      config.nombre = nombre;
+      config.pin    = pin;
+      localStorage.setItem('config', JSON.stringify(config));
+      // Sincronizar inputs de config
+      document.getElementById('input-nombre').value = nombre;
+      document.getElementById('input-pin').value    = pin;
+      actualizarSubtituloMenu();
+      bienvenida.style.display = 'none';
+    });
   })();
 
   // ── Navegación ───────────────────────────────────────────────────────
