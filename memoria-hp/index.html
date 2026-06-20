@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memoria Mágica ⚡</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #1a1040;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 12px;
+    }
+
+    h1 {
+      color: #e8d5a3;
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      letter-spacing: 1px;
+    }
+
+    .subtitle {
+      color: #9b8ec4;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    /* Marcador */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #2a1f5e;
+      border: 1px solid #3d2f7a;
+      border-radius: 10px;
+      padding: 10px 20px;
+      text-align: center;
+      min-width: 80px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #e8d5a3;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #9b8ec4;
+      margin-top: 2px;
+    }
+
+    /* Grilla de cartas */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      max-width: 360px;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    /* Cada carta tiene un contenedor que gira */
+    .card {
+      aspect-ratio: 1;
+      cursor: pointer;
+      perspective: 600px;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.4s ease;
+      border-radius: 10px;
+    }
+
+    /* Cuando la carta está volteada, giramos el inner */
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Dorso: morado oscuro con rayo */
+    .card-back {
+      background: #3C3489;
+      border: 2px solid #534AB7;
+      font-size: 24px;
+    }
+
+    /* Frente: claro con el emoji */
+    .card-front {
+      background: #f5f0ff;
+      border: 2px solid #9b8ec4;
+      font-size: 32px;
+      transform: rotateY(180deg);
+    }
+
+    /* Carta encontrada */
+    .card.matched .card-front {
+      background: #d4edda;
+      border-color: #5a9e6f;
+    }
+
+    /* Carta bloqueada (no se puede clickear) */
+    .card.blocked {
+      pointer-events: none;
+    }
+
+    /* Botón reiniciar */
+    .btn-restart {
+      background: #3C3489;
+      color: #e8d5a3;
+      border: 1px solid #534AB7;
+      border-radius: 10px;
+      padding: 12px 32px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-restart:hover {
+      background: #534AB7;
+    }
+
+    /* Pantalla de victoria */
+    .win-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .win-screen.visible {
+      display: flex;
+    }
+
+    .win-title {
+      font-size: 28px;
+      color: #e8d5a3;
+      font-weight: 600;
+    }
+
+    .win-msg {
+      color: #9b8ec4;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>⚡ Memoria Mágica</h1>
+  <p class="subtitle">Encuentra todas las parejas</p>
+
+  <div class="stats">
+    <div class="stat-box">
+      <div class="stat-value" id="intentos">0</div>
+      <div class="stat-label">Intentos</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="parejas">0</div>
+      <div class="stat-label">Parejas</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="tiempo">0:00</div>
+      <div class="stat-label">Tiempo</div>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <button class="btn-restart" id="btn-restart">Nuevo juego</button>
+
+  <div class="win-screen" id="win-screen">
+    <div class="win-title">🎉 ¡Expecto Patronum!</div>
+    <div class="win-msg" id="win-msg"></div>
+  </div>
+
+<script>
+  // ── Emojis del juego (8 pares = 16 cartas) ──────────────────────────
+  const EMOJIS = ['🧙', '🦉', '🪄', '🎩', '🧹', '🫧', '📖', '⚡'];
+
+  // ── Estado del juego ─────────────────────────────────────────────────
+  let cartas = [];          // lista de objetos carta
+  let voltedas = [];        // cartas volteadas esperando comparación
+  let parejas = 0;
+  let intentos = 0;
+  let bloqueado = false;    // impide voltear mientras comparamos
+  let segundos = 0;
+  let intervalo = null;
+
+  // ── Referencias al DOM ───────────────────────────────────────────────
+  const grid       = document.getElementById('grid');
+  const elIntentos = document.getElementById('intentos');
+  const elParejas  = document.getElementById('parejas');
+  const elTiempo   = document.getElementById('tiempo');
+  const winScreen  = document.getElementById('win-screen');
+  const winMsg     = document.getElementById('win-msg');
+  const btnRestart = document.getElementById('btn-restart');
+
+  // ── Mezclar array (algoritmo Fisher-Yates) ───────────────────────────
+  function mezclar(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // ── Formatear segundos como M:SS ─────────────────────────────────────
+  function formatTiempo(s) {
+    const m = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    return `${m}:${ss}`;
+  }
+
+  // ── Iniciar / reiniciar el juego ─────────────────────────────────────
+  function iniciar() {
+    // Limpiar estado
+    voltedas = [];
+    parejas = 0;
+    intentos = 0;
+    bloqueado = false;
+    segundos = 0;
+    clearInterval(intervalo);
+
+    // Resetear UI
+    elIntentos.textContent = '0';
+    elParejas.textContent = '0';
+    elTiempo.textContent = '0:00';
+    winScreen.classList.remove('visible');
+    grid.innerHTML = '';
+
+    // Crear 16 cartas (cada emoji × 2) y mezclarlas
+    cartas = mezclar([...EMOJIS, ...EMOJIS]);
+
+    // Generar HTML de cada carta
+    cartas.forEach((emoji, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.emoji = emoji;
+      card.dataset.index = i;
+
+      card.innerHTML = `
+        <div class="card-inner">
+          <div class="card-back">⚡</div>
+          <div class="card-front">${emoji}</div>
+        </div>`;
+
+      card.addEventListener('click', () => voltear(card));
+      grid.appendChild(card);
+    });
+
+    // Arrancar temporizador
+    intervalo = setInterval(() => {
+      segundos++;
+      elTiempo.textContent = formatTiempo(segundos);
+    }, 1000);
+  }
+
+  // ── Voltear una carta ────────────────────────────────────────────────
+  function voltear(card) {
+    // Ignorar si está bloqueada, ya volteada o ya encontrada
+    if (bloqueado) return;
+    if (card.classList.contains('flipped')) return;
+    if (card.classList.contains('matched')) return;
+
+    card.classList.add('flipped');
+    voltedas.push(card);
+
+    // Cuando hay 2 cartas volteadas, comparamos
+    if (voltedas.length === 2) {
+      intentos++;
+      elIntentos.textContent = intentos;
+      comparar();
+    }
+  }
+
+  // ── Comparar las dos cartas volteadas ────────────────────────────────
+  function comparar() {
+    const [a, b] = voltedas;
+    const sonPareja = a.dataset.emoji === b.dataset.emoji;
+
+    if (sonPareja) {
+      // Marcar como encontradas
+      a.classList.add('matched', 'blocked');
+      b.classList.add('matched', 'blocked');
+      voltedas = [];
+      parejas++;
+      elParejas.textContent = parejas;
+
+      if (parejas === EMOJIS.length) {
+        ganar();
+      }
+    } else {
+      // No son pareja: bloquear y voltear de nuevo tras 1 segundo
+      bloqueado = true;
+      setTimeout(() => {
+        a.classList.remove('flipped');
+        b.classList.remove('flipped');
+        voltedas = [];
+        bloqueado = false;
+      }, 1000);
+    }
+  }
+
+  // ── Victoria ─────────────────────────────────────────────────────────
+  function ganar() {
+    clearInterval(intervalo);
+    winMsg.textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
+    winScreen.classList.add('visible');
+  }
+
+  // ── Eventos ──────────────────────────────────────────────────────────
+  btnRestart.addEventListener('click', iniciar);
+
+  // Arrancar al cargar la página
+  iniciar();
+</script>
+</body>
+</html>
