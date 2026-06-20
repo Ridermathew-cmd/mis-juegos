@@ -271,6 +271,27 @@
       from { opacity: 0; transform: scale(0.95); }
       to   { opacity: 1; transform: scale(1); }
     }
+
+    /* Botón de música */
+    .music-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #2a1f5e;
+      border: 1px solid #534AB7;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+
+    .music-btn:hover { background: #3C3489; }
   </style>
 </head>
 <body>
@@ -306,6 +327,9 @@
       <div class="spell-desc" id="spell-desc"></div>
     </div>
   </div>
+
+  <!-- Botón música -->
+  <button class="music-btn" id="music-btn" title="Música">🔇</button>
 
   <!-- Grimorio: colección de hechizos conseguidos -->
   <div class="grimorio" id="grimorio">
@@ -504,6 +528,75 @@
   }
 
   btnRestart.addEventListener('click', iniciar);
+
+  // ── Música generada con Web Audio API ───────────────────────────────
+  let audioCtx = null;
+  let musicaActiva = false;
+  let nodos = [];
+  const musicBtn = document.getElementById('music-btn');
+
+  // Melodía mágica: frecuencias en Hz (escala de Mi menor, estilo Hedwig)
+  const MELODIA = [
+    659, 0, 784, 0, 1047, 988, 784, 0,
+    1047, 0, 988, 0, 784, 1047, 988, 0,
+    880, 0, 698, 0, 932, 880, 698, 0,
+    698, 0, 659, 0, 784, 0, 659, 0,
+  ];
+
+  function crearAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  function tocarNota(frecuencia, inicio, duracion, volumen) {
+    if (!frecuencia) return;
+    const osc    = audioCtx.createOscillator();
+    const gain   = audioCtx.createGain();
+    const reverb = audioCtx.createConvolver();
+
+    osc.type = 'triangle';
+    osc.frequency.value = frecuencia;
+
+    gain.gain.setValueAtTime(0, inicio);
+    gain.gain.linearRampToValueAtTime(volumen, inicio + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, inicio + duracion);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(inicio);
+    osc.stop(inicio + duracion + 0.1);
+    nodos.push(osc);
+  }
+
+  function reproducirMelodia() {
+    if (!musicaActiva) return;
+    const bpm = 160;
+    const duracionNota = 60 / bpm;
+    const ahora = audioCtx.currentTime;
+
+    MELODIA.forEach((freq, i) => {
+      tocarNota(freq, ahora + i * duracionNota, duracionNota * 0.8, 0.15);
+    });
+
+    const totalDuracion = MELODIA.length * duracionNota * 1000;
+    setTimeout(() => { if (musicaActiva) reproducirMelodia(); }, totalDuracion);
+  }
+
+  function toggleMusica() {
+    crearAudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    musicaActiva = !musicaActiva;
+    musicBtn.textContent = musicaActiva ? '🔊' : '🔇';
+
+    if (musicaActiva) {
+      reproducirMelodia();
+    } else {
+      nodos.forEach(n => { try { n.stop(); } catch(e) {} });
+      nodos = [];
+    }
+  }
+
+  musicBtn.addEventListener('click', toggleMusica);
 
   // Mostrar grimorio al cargar
   renderGrimorio();
