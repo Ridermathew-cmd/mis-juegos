@@ -184,6 +184,27 @@
     <button class="btn-volver" id="btn-volver-tienda">← Volver al menú</button>
   </div>
 
+  <!-- ══ TROFEO HOGWARTS ══ -->
+  <div class="pantalla" id="pantalla-trofeo">
+    <div style="text-align:center; padding: 30px 0 10px;">
+      <div style="font-size:80px; animation: flotar 3s ease-in-out infinite;">🏆</div>
+      <div style="font-size:22px; font-weight:700; color:#e8d5a3; margin-top:16px; letter-spacing:1px;">Trofeo de Hogwarts</div>
+      <div style="font-size:13px; color:#c9a84c; margin-top:6px;">Maestro Mago Completo</div>
+    </div>
+
+    <div style="background:#2a1f5e; border:1px solid #c9a84c; border-radius:14px; padding:20px; margin:20px 0; text-align:center; width:100%;">
+      <div style="font-size:15px; color:#e8d5a3; font-weight:600; margin-bottom:10px;">Has dominado todos los hechizos del grimorio</div>
+      <div style="font-size:13px; color:#9b8ec4; line-height:1.7;">
+        Lumos, Expecto Patronum, Accio y los 12 restantes.<br>
+        Eres digno del titulo de Maestro Mago de Hogwarts.
+      </div>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:24px; font-size:24px;" id="trofeo-emojis"></div>
+
+    <button class="btn-menu btn-jugar" id="btn-trofeo-menu" style="width:100%;">Volver al menu</button>
+  </div>
+
   <!-- ══ RANKING ══ -->
   <div class="pantalla" id="pantalla-ranking">
     <div class="config-titulo">🏆 Ranking</div>
@@ -382,6 +403,19 @@
 
   function tieneHechizo(nombre) { return hechizosDesbloqueados.some(h => h.nombre === nombre); }
 
+  function verificarGrimorioCompleto() {
+    if (hechizosDesbloqueados.length < HECHIZOS.length) return;
+    if (localStorage.getItem('trofeo_mostrado')) return;
+    localStorage.setItem('trofeo_mostrado', '1');
+    setTimeout(() => mostrarTrofeo(), 1200);
+  }
+
+  function mostrarTrofeo() {
+    const emojis = document.getElementById('trofeo-emojis');
+    emojis.innerHTML = hechizosDesbloqueados.map(h => `<span>${h.emoji}</span>`).join('');
+    mostrar('pantalla-trofeo');
+  }
+
   function renderGrimorio(targetId) {
     const grid = document.getElementById(targetId || 'grimorio-grid');
     if (!hechizosDesbloqueados.length) {
@@ -430,6 +464,7 @@
         localStorage.setItem('hechizos', JSON.stringify(hechizosDesbloqueados));
         guardarGaleones();
         renderTienda();
+        verificarGrimorioCompleto();
       });
     });
   }
@@ -595,9 +630,11 @@
     document.getElementById('galeones-ganados').textContent = `🪙 +${ganados} galeones ganados`;
     document.getElementById('win-screen').classList.add('visible');
     renderGrimorio();
+    verificarGrimorioCompleto();
   }
 
   // ── Eventos ──────────────────────────────────────────────────────────
+  document.getElementById('btn-trofeo-menu').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
   document.getElementById('btn-ir-tienda').addEventListener('click', () => { mostrar('pantalla-tienda'); renderTienda(); });
   document.getElementById('btn-ir-ranking').addEventListener('click', () => { mostrar('pantalla-ranking'); renderRanking(); });
