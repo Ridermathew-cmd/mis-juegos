@@ -546,7 +546,7 @@
       const pin    = document.getElementById('bienvenida-pin').value.trim();
       const err    = document.getElementById('bienvenida-error');
       if (!nombre) { err.textContent = 'Escribe tu nombre para continuar.'; return; }
-      if (pin.length > 0 && !/^\d{4}$/.test(pin)) { err.textContent = 'El PIN debe tener exactamente 4 números.'; return; }
+      if (!/^\d{4}$/.test(pin)) { err.textContent = 'El PIN es obligatorio y debe tener 4 números.'; return; }
       err.textContent = '';
       config.nombre = nombre;
       config.pin    = pin;
