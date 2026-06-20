@@ -479,31 +479,50 @@
     }
   }
 
-  // ── Ranking ──────────────────────────────────────────────────────────
-  function guardarEnRanking(ganados) {
-    const nombre = config.nombre || 'Anónimo';
-    const entrada = ranking.find(r => r.nombre === nombre);
-    if (entrada) {
-      entrada.galeones += ganados;
-      entrada.partidas += 1;
-      entrada.mejor = Math.min(entrada.mejor, intentos);
-    } else {
-      ranking.push({ nombre, galeones: ganados, partidas: 1, mejor: intentos });
-    }
+  // ── Firebase Ranking ─────────────────────────────────────────────────
+  const FB_URL = 'https://memoria-magica-f931c-default-rtdb.firebaseio.com/ranking';
+
+  // Firebase no permite . # $ [ ] en claves — los reemplazamos
+  function claveSegura(nombre) {
+    return nombre.replace(/[.#$\[\]]/g, '_');
+  }
+
+  async function guardarEnRanking(ganados) {
+    const nombre = config.nombre || 'Anonimo';
+    const clave  = claveSegura(nombre);
+    const url    = `${FB_URL}/${clave}.json`;
+
+    // Leer el registro actual de este jugador en Firebase
+    let entrada = null;
+    try {
+      const res = await fetch(url);
+      entrada = await res.json();
+    } catch(e) {}
+
+    const nuevo = entrada
+      ? { nombre, galeones: entrada.galeones + ganados, partidas: entrada.partidas + 1, mejor: Math.min(entrada.mejor, intentos) }
+      : { nombre, galeones: ganados, partidas: 1, mejor: intentos };
+
+    // Guardar en Firebase
+    try { await fetch(url, { method: 'PUT', body: JSON.stringify(nuevo) }); } catch(e) {}
+
+    // Guardar también en localStorage como caché
+    const idx = ranking.findIndex(r => r.nombre === nombre);
+    if (idx >= 0) ranking[idx] = nuevo; else ranking.push(nuevo);
     localStorage.setItem('ranking', JSON.stringify(ranking));
   }
 
-  function renderRanking() {
+  function mostrarListaRanking(datos) {
     const lista = document.getElementById('ranking-lista');
-    if (!ranking.length) {
-      lista.innerHTML = '<div class="grimorio-empty">Nadie ha jugado todavía. ¡Sé el primero!</div>';
+    if (!datos.length) {
+      lista.innerHTML = '<div class="grimorio-empty">Nadie ha jugado todavía. ¡Se el primero!</div>';
       return;
     }
-    const sorted = [...ranking].sort((a, b) => b.galeones - a.galeones);
+    const sorted = [...datos].sort((a, b) => b.galeones - a.galeones);
     const medallas = ['🥇', '🥈', '🥉'];
     lista.innerHTML = '';
     sorted.forEach((r, i) => {
-      const esTuyo = r.nombre === (config.nombre || 'Anónimo');
+      const esTuyo = r.nombre === (config.nombre || 'Anonimo');
       const el = document.createElement('div');
       el.style.cssText = `
         background: ${esTuyo ? '#3C3489' : '#2a1f5e'};
@@ -512,15 +531,36 @@
         display: flex; align-items: center; gap: 12px;
       `;
       el.innerHTML = `
-        <div style="font-size:14px; font-weight:700; color:#e8d5a3; flex-shrink:0; min-width:28px; text-align:center;">${medallas[i] || `${i+1}ro`}</div>
+        <div style="font-size:22px; flex-shrink:0; min-width:32px; text-align:center;">${medallas[i] || `${i+1}`}</div>
         <div style="flex:1;">
-          <div style="font-size:15px; font-weight:600; color:#e8d5a3;">${r.nombre}${esTuyo ? ' (tú)' : ''}</div>
+          <div style="font-size:15px; font-weight:600; color:#e8d5a3;">${r.nombre}${esTuyo ? ' (tu)' : ''}</div>
           <div style="font-size:12px; color:#9b8ec4; margin-top:2px;">${r.partidas} partida${r.partidas !== 1 ? 's' : ''} · Mejor: ${r.mejor} intentos</div>
         </div>
-        <div style="font-size:15px; font-weight:700; color:#c9a84c;">🪙 ${r.galeones} galeones</div>
+        <div style="font-size:15px; font-weight:700; color:#c9a84c;">🪙 ${r.galeones}</div>
       `;
       lista.appendChild(el);
     });
+  }
+
+  async function renderRanking() {
+    const lista = document.getElementById('ranking-lista');
+    lista.innerHTML = '<div class="grimorio-empty">Cargando ranking...</div>';
+
+    try {
+      const res  = await fetch(`${FB_URL}.json`);
+      const data = await res.json();
+      if (data) {
+        const jugadores = Object.values(data);
+        ranking = jugadores;
+        localStorage.setItem('ranking', JSON.stringify(ranking));
+        mostrarListaRanking(jugadores);
+      } else {
+        mostrarListaRanking([]);
+      }
+    } catch(e) {
+      // Sin internet: usar caché local
+      mostrarListaRanking(ranking);
+    }
   }
 
   function ganar() {
