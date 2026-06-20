@@ -71,27 +71,62 @@
     }
     .btn-volver:hover { color: #e8d5a3; }
 
-    /* ── Tutorial ── */
-    .tutorial-paso {
-      display: flex; gap: 14px; align-items: flex-start;
-      background: #2a1f5e; border: 1px solid #3d2f7a;
-      border-radius: 14px; padding: 16px;
-      animation: aparecer 0.4s ease both;
+    /* ── Tutorial interactivo ── */
+    #tut-burbuja {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: #2a1f5e; border: 2px solid #534AB7;
+      border-radius: 16px; padding: 14px 16px;
+      width: 100%; margin-bottom: 24px;
+      animation: aparecer 0.4s ease;
+      min-height: 72px;
     }
-    .tutorial-num {
-      min-width: 32px; height: 32px; border-radius: 50%;
-      background: #534AB7; color: #fff;
-      font-size: 15px; font-weight: 700;
+    #tut-burbuja-ico { font-size: 28px; flex-shrink: 0; }
+    #tut-burbuja-txt { font-size: 14px; color: #e8d5a3; line-height: 1.7; }
+
+    #tut-tablero {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      width: 100%;
+    }
+
+    .tut-carta {
+      aspect-ratio: 1;
+      border-radius: 12px;
+      cursor: pointer;
+      perspective: 600px;
+      transition: transform 0.15s;
+    }
+    .tut-carta:active { transform: scale(0.94); }
+
+    .tut-carta-inner {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.45s ease;
+      border-radius: 12px;
+    }
+    .tut-carta.volteada .tut-carta-inner { transform: rotateY(180deg); }
+    .tut-carta.encontrada .tut-carta-inner { transform: rotateY(180deg); }
+
+    .tut-frente, .tut-dorso {
+      position: absolute; inset: 0;
+      border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      font-size: 32px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
-    .tutorial-titulo-paso { font-size: 15px; font-weight: 700; color: #e8d5a3; margin-bottom: 4px; }
-    .tutorial-desc { font-size: 13px; color: #9b8ec4; line-height: 1.6; }
-    .tutorial-demo {
-      margin-top: 8px; font-size: 20px; letter-spacing: 4px;
-      background: #1a1040; border-radius: 8px; padding: 6px 10px;
-      display: inline-block;
+    .tut-dorso  { background: #2a1f5e; border: 2px solid #3d2f7a; font-size: 22px; }
+    .tut-frente { background: #3C3489; border: 2px solid #534AB7; transform: rotateY(180deg); }
+
+    .tut-carta.encontrada .tut-frente { background: #1f4a2a; border-color: #4caf50; }
+
+    @keyframes tut-highlight {
+      0%, 100% { box-shadow: 0 0 0 3px #e8d5a3; }
+      50%       { box-shadow: 0 0 0 6px #e8d5a3, 0 0 18px #e8d5a344; }
     }
+    .tut-highlight { animation: tut-highlight 0.9s ease-in-out infinite; }
 
     /* ── Tienda ── */
     .tienda-saldo {
@@ -334,58 +369,27 @@
 
   <!-- ══ TUTORIAL ══ -->
   <div class="pantalla" id="pantalla-tutorial">
-    <div class="config-titulo">📜 Cómo jugar</div>
 
-    <div style="display:flex; flex-direction:column; gap:16px; width:100%; margin-bottom:28px;">
-
-      <div class="tutorial-paso">
-        <div class="tutorial-num">1</div>
-        <div>
-          <div class="tutorial-titulo-paso">Voltea las cartas</div>
-          <div class="tutorial-desc">Toca cualquier carta para darla vuelta y ver el símbolo que esconde.</div>
-          <div class="tutorial-demo">🃏 → ⚡</div>
-        </div>
-      </div>
-
-      <div class="tutorial-paso">
-        <div class="tutorial-num">2</div>
-        <div>
-          <div class="tutorial-titulo-paso">Encuentra la pareja</div>
-          <div class="tutorial-desc">Toca una segunda carta. Si tiene el mismo símbolo, ¡encontraste la pareja! Quedan descubiertas.</div>
-          <div class="tutorial-demo">⚡ + ⚡ = ✅</div>
-        </div>
-      </div>
-
-      <div class="tutorial-paso">
-        <div class="tutorial-num">3</div>
-        <div>
-          <div class="tutorial-titulo-paso">Si no coinciden</div>
-          <div class="tutorial-desc">Las dos cartas se vuelven a tapar. Memoriza dónde estaba cada símbolo.</div>
-          <div class="tutorial-demo">🧙 + 🦉 = ❌</div>
-        </div>
-      </div>
-
-      <div class="tutorial-paso">
-        <div class="tutorial-num">4</div>
-        <div>
-          <div class="tutorial-titulo-paso">Gana monedas y hechizos</div>
-          <div class="tutorial-desc">Al completar el tablero ganas galeones 🪙 según tu velocidad y precisión. Cada partida te otorga un hechizo nuevo del grimorio.</div>
-          <div class="tutorial-demo">🏆 → 🪙 + 🪄</div>
-        </div>
-      </div>
-
-      <div class="tutorial-paso">
-        <div class="tutorial-num">5</div>
-        <div>
-          <div class="tutorial-titulo-paso">Sube en el ranking</div>
-          <div class="tutorial-desc">Acumula galeones para superar a los demás jugadores y llegar al primer puesto.</div>
-          <div class="tutorial-demo">🥇 🥈 🥉</div>
-        </div>
-      </div>
-
+    <!-- Burbuja de instrucción -->
+    <div id="tut-burbuja">
+      <div id="tut-burbuja-ico">🧙</div>
+      <div id="tut-burbuja-txt"></div>
     </div>
 
-    <button class="btn-volver" id="btn-volver-tutorial">← Volver al menú</button>
+    <!-- Tablero del tutorial -->
+    <div id="tut-tablero"></div>
+
+    <!-- Pantalla final -->
+    <div id="tut-fin" style="display:none; flex-direction:column; align-items:center; gap:16px; text-align:center; padding:20px 0;">
+      <div style="font-size:56px;">🏆</div>
+      <div style="font-size:20px; font-weight:700; color:#e8d5a3;">¡Ya sabes jugar!</div>
+      <div style="font-size:14px; color:#9b8ec4; line-height:1.7;">
+        En el juego real ganas 🪙 galeones por tu velocidad<br>y un hechizo nuevo cada vez que completas el tablero.
+      </div>
+      <button class="btn-menu btn-jugar" id="tut-btn-jugar" style="width:100%; margin-top:8px;">🧙 ¡Jugar de verdad!</button>
+    </div>
+
+    <button class="btn-volver" id="btn-volver-tutorial" style="margin-top:20px;">← Volver al menú</button>
   </div>
 
   <!-- ══ TIENDA ══ -->
@@ -910,8 +914,124 @@
   document.getElementById('btn-jugar').addEventListener('click', () => { mostrar('pantalla-juego'); iniciar(); });
   document.getElementById('btn-ir-tienda').addEventListener('click', () => { mostrar('pantalla-tienda'); renderTienda(); });
   document.getElementById('btn-ir-ranking').addEventListener('click', () => { mostrar('pantalla-ranking'); renderRanking(); });
-  document.getElementById('btn-ir-tutorial').addEventListener('click', () => mostrar('pantalla-tutorial'));
+  document.getElementById('btn-ir-tutorial').addEventListener('click', () => { mostrar('pantalla-tutorial'); iniciarTutorial(); });
   document.getElementById('btn-volver-tutorial').addEventListener('click', () => mostrar('pantalla-menu'));
+  document.getElementById('tut-btn-jugar').addEventListener('click', () => { mostrar('pantalla-menu'); });
+
+  // ── Tutorial interactivo ─────────────────────────────────────────────
+  function iniciarTutorial() {
+    // Resetear
+    document.getElementById('tut-fin').style.display = 'none';
+    document.getElementById('tut-tablero').style.display = 'grid';
+    document.getElementById('tut-burbuja').style.display = 'flex';
+
+    // 6 cartas: 3 pares fijos [⚡,⚡, 🦉,🦉, 🧙,🧙] barajadas
+    const pares = ['⚡','⚡','🦉','🦉','🧙','🧙'];
+    const emojis = pares.sort(() => Math.random() - 0.5);
+
+    let primera = null;   // índice de la primera carta volteada
+    let bloqueado = false;
+    let encontradas = 0;
+    let faseNoCoincide = false; // ¿ya mostramos la lección de no-coincide?
+
+    const tablero = document.getElementById('tut-tablero');
+    tablero.innerHTML = '';
+
+    const cartas = emojis.map((emoji, i) => {
+      const carta = document.createElement('div');
+      carta.className = 'tut-carta';
+      carta.innerHTML = `
+        <div class="tut-carta-inner">
+          <div class="tut-dorso">✨</div>
+          <div class="tut-frente">${emoji}</div>
+        </div>`;
+      carta.dataset.emoji = emoji;
+      carta.dataset.idx = i;
+      tablero.appendChild(carta);
+      carta.addEventListener('click', () => tutTocaCarta(i));
+      return carta;
+    });
+
+    function decir(ico, txt) {
+      document.getElementById('tut-burbuja-ico').textContent = ico;
+      document.getElementById('tut-burbuja-txt').textContent = txt;
+    }
+
+    function resaltarTodas() {
+      cartas.forEach(c => { if (!c.classList.contains('encontrada')) c.classList.add('tut-highlight'); });
+    }
+    function quitarResalte() {
+      cartas.forEach(c => c.classList.remove('tut-highlight'));
+    }
+
+    // Paso inicial
+    decir('🧙', 'Aquí hay 6 cartas boca abajo. Toca cualquiera para ver qué símbolo esconde.');
+    resaltarTodas();
+
+    function tutTocaCarta(idx) {
+      const carta = cartas[idx];
+      if (bloqueado) return;
+      if (carta.classList.contains('volteada')) return;
+      if (carta.classList.contains('encontrada')) return;
+
+      quitarResalte();
+      carta.classList.add('volteada');
+
+      if (primera === null) {
+        // Primera carta volteada
+        primera = idx;
+        decir('🧙', 'Bien. Ahora toca otra carta e intenta encontrar la que tenga el mismo símbolo.');
+        // Resaltar las no volteadas
+        cartas.forEach((c, i) => { if (i !== idx && !c.classList.contains('encontrada')) c.classList.add('tut-highlight'); });
+
+      } else {
+        // Segunda carta volteada
+        bloqueado = true;
+        quitarResalte();
+        const primeraCarta = cartas[primera];
+        const coincide = primeraCarta.dataset.emoji === carta.dataset.emoji;
+
+        if (coincide) {
+          setTimeout(() => {
+            primeraCarta.classList.remove('volteada');
+            carta.classList.remove('volteada');
+            primeraCarta.classList.add('encontrada');
+            carta.classList.add('encontrada');
+            encontradas += 2;
+            primera = null;
+            bloqueado = false;
+
+            if (encontradas === 6) {
+              // Fin
+              setTimeout(() => {
+                document.getElementById('tut-tablero').style.display = 'none';
+                document.getElementById('tut-burbuja').style.display = 'none';
+                document.getElementById('tut-fin').style.display = 'flex';
+              }, 600);
+            } else {
+              decir('🌟', '¡Pareja encontrada! Las cartas quedan descubiertas. Sigue buscando las demás.');
+              cartas.forEach(c => { if (!c.classList.contains('encontrada')) c.classList.add('tut-highlight'); });
+            }
+          }, 500);
+
+        } else {
+          setTimeout(() => {
+            if (!faseNoCoincide) {
+              faseNoCoincide = true;
+              decir('🦉', 'No coinciden. Las cartas se tapan de nuevo. ¡Recuerda dónde viste cada símbolo!');
+            } else {
+              decir('🧙', 'Sigue intentando. Toca una carta que recuerdes.');
+            }
+            primeraCarta.classList.remove('volteada');
+            carta.classList.remove('volteada');
+            primera = null;
+            bloqueado = false;
+            cartas.forEach(c => { if (!c.classList.contains('encontrada')) c.classList.add('tut-highlight'); });
+          }, 1100);
+        }
+      }
+    }
+  }
   document.getElementById('btn-volver-ranking').addEventListener('click', () => mostrar('pantalla-menu'));
   document.getElementById('btn-ir-config').addEventListener('click', () => mostrar('pantalla-config'));
   document.getElementById('btn-ir-hechizos').addEventListener('click', () => { mostrar('pantalla-hechizos'); renderGrimorio('grimorio-grid-menu'); });
