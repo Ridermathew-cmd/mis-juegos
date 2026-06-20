@@ -709,7 +709,7 @@
     return nombre.replace(/[.#$\[\]]/g, '_');
   }
 
-  async function guardarEnRanking() {
+  async function guardarEnRanking(ganados) {
     const nombre = config.nombre || 'Anonimo';
     const pin    = config.pin || '';
     const clave  = claveSegura(nombre);
@@ -731,11 +731,9 @@
       }
     }
 
-    const mejorIntentos = entrada ? Math.min(entrada.mejor_intentos, intentos) : intentos;
-    const mejorTiempo   = entrada ? Math.min(entrada.mejor_tiempo,   segundos) : segundos;
     const nuevo = entrada
-      ? { nombre, pin, partidas: entrada.partidas + 1, mejor_intentos: mejorIntentos, mejor_tiempo: mejorTiempo }
-      : { nombre, pin, partidas: 1, mejor_intentos: intentos, mejor_tiempo: segundos };
+      ? { nombre, pin, galeones: entrada.galeones + ganados, partidas: entrada.partidas + 1, mejor: Math.min(entrada.mejor, intentos) }
+      : { nombre, pin, galeones: ganados, partidas: 1, mejor: intentos };
 
     // Guardar en Firebase
     try { await fetch(url, { method: 'PUT', body: JSON.stringify(nuevo) }); } catch(e) {}
@@ -752,10 +750,7 @@
       lista.innerHTML = '<div class="grimorio-empty">Nadie ha jugado todavía. ¡Se el primero!</div>';
       return;
     }
-    const sorted = [...datos].sort((a, b) => {
-      if ((a.mejor_intentos || 999) !== (b.mejor_intentos || 999)) return (a.mejor_intentos || 999) - (b.mejor_intentos || 999);
-      return (a.mejor_tiempo || 9999) - (b.mejor_tiempo || 9999);
-    });
+    const sorted = [...datos].sort((a, b) => b.galeones - a.galeones);
     const medallas = ['🥇', '🥈', '🥉'];
     lista.innerHTML = '';
     sorted.forEach((r, i) => {
@@ -771,12 +766,9 @@
         <div style="font-size:22px; flex-shrink:0; min-width:32px; text-align:center;">${medallas[i] || `${i+1}`}</div>
         <div style="flex:1;">
           <div style="font-size:15px; font-weight:600; color:#e8d5a3;">${r.nombre}${esTuyo ? ' (tu)' : ''}</div>
-          <div style="font-size:12px; color:#9b8ec4; margin-top:2px;">${r.partidas} partida${r.partidas !== 1 ? 's' : ''}</div>
+          <div style="font-size:12px; color:#9b8ec4; margin-top:2px;">${r.partidas} partida${r.partidas !== 1 ? 's' : ''} · Mejor: ${r.mejor} intentos</div>
         </div>
-        <div style="text-align:right;">
-          <div style="font-size:14px; font-weight:700; color:#e8d5a3;">⚡ ${r.mejor_intentos} int.</div>
-          <div style="font-size:12px; color:#9b8ec4;">${formatTiempo(r.mejor_tiempo)}</div>
-        </div>
+        <div style="font-size:15px; font-weight:700; color:#c9a84c;">🪙 ${r.galeones}</div>
       `;
       lista.appendChild(el);
     });
@@ -808,7 +800,7 @@
     const ganados = calcularGaleones(intentos, segundos, config.pares);
     galeones += ganados;
     guardarGaleones();
-    guardarEnRanking();
+    guardarEnRanking(ganados);
 
     document.getElementById('win-msg').textContent = `Lo lograste en ${intentos} intentos y ${formatTiempo(segundos)}. ¡Eres un mago!`;
     document.getElementById('galeones-ganados').textContent = `🪙 +${ganados} galeones ganados`;
