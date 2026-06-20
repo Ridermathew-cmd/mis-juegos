@@ -240,7 +240,7 @@
     <div class="juego-header">
       <button class="btn-menu-juego" id="btn-volver-juego">← Menú</button>
       <div class="juego-titulo">⚡ Memoria Mágica</div>
-      <div style="font-size:13px; color:#c9a84c; font-weight:600;" id="juego-galeones">🪙 0</div>
+      <div style="font-size:13px; color:#c9a84c; font-weight:600;" id="juego-galeones">🪙 0 galeones</div>
     </div>
 
     <div class="stats">
@@ -346,7 +346,7 @@
 
   function actualizarGaleonesUI() {
     document.getElementById('menu-galeones').textContent = `🪙 ${galeones} galeones`;
-    document.getElementById('juego-galeones').textContent = `🪙 ${galeones}`;
+    document.getElementById('juego-galeones').textContent = `🪙 ${galeones} galeones`;
     const ts = document.getElementById('tienda-saldo');
     if (ts) ts.textContent = `🪙 ${galeones} galeones disponibles`;
   }
@@ -374,7 +374,7 @@
   function renderGrimorio(targetId) {
     const grid = document.getElementById(targetId || 'grimorio-grid');
     if (!hechizosDesbloqueados.length) {
-      grid.innerHTML = '<div class="grimorio-empty">Comprá o ganá tu primer hechizo en la tienda.</div>';
+      grid.innerHTML = '<div class="grimorio-empty">Compra o gana tu primer hechizo en la tienda.</div>';
       return;
     }
     grid.innerHTML = '';
@@ -405,7 +405,7 @@
         <button class="btn-comprar${tiene ? ' ya-tiene' : ''}"
           ${tiene ? 'disabled' : (!puedePagar ? 'disabled' : '')}
           data-nombre="${h.nombre}">
-          ${tiene ? '✓ Tenés' : `🪙 ${h.precio}`}
+          ${tiene ? 'Tienes' : `${h.precio} galeones`}
         </button>`;
       lista.appendChild(item);
     });
@@ -512,12 +512,12 @@
         display: flex; align-items: center; gap: 12px;
       `;
       el.innerHTML = `
-        <div style="font-size:24px; flex-shrink:0;">${medallas[i] || `#${i+1}`}</div>
+        <div style="font-size:14px; font-weight:700; color:#e8d5a3; flex-shrink:0; min-width:28px; text-align:center;">${medallas[i] || `${i+1}ro`}</div>
         <div style="flex:1;">
           <div style="font-size:15px; font-weight:600; color:#e8d5a3;">${r.nombre}${esTuyo ? ' (tú)' : ''}</div>
           <div style="font-size:12px; color:#9b8ec4; margin-top:2px;">${r.partidas} partida${r.partidas !== 1 ? 's' : ''} · Mejor: ${r.mejor} intentos</div>
         </div>
-        <div style="font-size:15px; font-weight:700; color:#c9a84c;">🪙 ${r.galeones}</div>
+        <div style="font-size:15px; font-weight:700; color:#c9a84c;">🪙 ${r.galeones} galeones</div>
       `;
       lista.appendChild(el);
     });
