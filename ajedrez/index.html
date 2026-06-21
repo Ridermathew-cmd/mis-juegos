@@ -309,6 +309,12 @@
       40% { transform: translateY(-6px); }
     }
 
+    /* evitar scroll al arrastrar piezas en mobile */
+    #board-wrap,
+    #board-wrap * {
+      touch-action: none;
+    }
+
     @media (max-width: 480px) {
       #board-wrap { max-width: 100%; }
     }
