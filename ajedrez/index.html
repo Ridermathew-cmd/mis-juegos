@@ -419,7 +419,7 @@
 
 <script>
 // ── Estado global ────────────────────────────────────────────────
-let game, board, stockfish;
+let game, board;
 let mode = null;          // 'local' | 'ai'
 let aiDepth = 1;
 let playerColor = 'w';    // color del jugador humano en modo IA
@@ -492,42 +492,161 @@ function startGame() {
     setTimeout(makeAIMove, 200);
   }
 
-  initStockfish();
 }
 
-// ── Stockfish ────────────────────────────────────────────────────
-function initStockfish() {
-  if (stockfish) return;
-  stockfish = new Worker('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');
-  stockfish.onmessage = function(e) {
-    const msg = e.data;
-    if (typeof msg === 'string' && msg.startsWith('bestmove')) {
-      const parts = msg.split(' ');
-      const move  = parts[1];
-      if (move && move !== '(none)') {
-        const from = move.substring(0,2);
-        const to   = move.substring(2,4);
-        const promo= move.length > 4 ? move[4] : undefined;
-        const result = game.move({ from, to, promotion: promo || 'q' });
-        if (result) {
-          board.position(game.fen());
-          updateBars();
-          updateStatus();
-          removeHighlights();
-          highlightMove(from, to);
-        }
-      }
+// ── IA: Minimax con alpha-beta ───────────────────────────────────
+const PIECE_SCORE = { p:100, n:320, b:330, r:500, q:900, k:20000 };
+
+// tablas de posición para que las piezas prefieran casillas buenas
+const PST = {
+  p: [
+     0,  0,  0,  0,  0,  0,  0,  0,
+    50, 50, 50, 50, 50, 50, 50, 50,
+    10, 10, 20, 30, 30, 20, 10, 10,
+     5,  5, 10, 25, 25, 10,  5,  5,
+     0,  0,  0, 20, 20,  0,  0,  0,
+     5, -5,-10,  0,  0,-10, -5,  5,
+     5, 10, 10,-20,-20, 10, 10,  5,
+     0,  0,  0,  0,  0,  0,  0,  0
+  ],
+  n: [
+    -50,-40,-30,-30,-30,-30,-40,-50,
+    -40,-20,  0,  0,  0,  0,-20,-40,
+    -30,  0, 10, 15, 15, 10,  0,-30,
+    -30,  5, 15, 20, 20, 15,  5,-30,
+    -30,  0, 15, 20, 20, 15,  0,-30,
+    -30,  5, 10, 15, 15, 10,  5,-30,
+    -40,-20,  0,  5,  5,  0,-20,-40,
+    -50,-40,-30,-30,-30,-30,-40,-50
+  ],
+  b: [
+    -20,-10,-10,-10,-10,-10,-10,-20,
+    -10,  0,  0,  0,  0,  0,  0,-10,
+    -10,  0,  5, 10, 10,  5,  0,-10,
+    -10,  5,  5, 10, 10,  5,  5,-10,
+    -10,  0, 10, 10, 10, 10,  0,-10,
+    -10, 10, 10, 10, 10, 10, 10,-10,
+    -10,  5,  0,  0,  0,  0,  5,-10,
+    -20,-10,-10,-10,-10,-10,-10,-20
+  ],
+  r: [
+     0,  0,  0,  0,  0,  0,  0,  0,
+     5, 10, 10, 10, 10, 10, 10,  5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+    -5,  0,  0,  0,  0,  0,  0, -5,
+     0,  0,  0,  5,  5,  0,  0,  0
+  ],
+  q: [
+    -20,-10,-10, -5, -5,-10,-10,-20,
+    -10,  0,  0,  0,  0,  0,  0,-10,
+    -10,  0,  5,  5,  5,  5,  0,-10,
+     -5,  0,  5,  5,  5,  5,  0, -5,
+      0,  0,  5,  5,  5,  5,  0, -5,
+    -10,  5,  5,  5,  5,  5,  0,-10,
+    -10,  0,  5,  0,  0,  0,  0,-10,
+    -20,-10,-10, -5, -5,-10,-10,-20
+  ],
+  k: [
+    -30,-40,-40,-50,-50,-40,-40,-30,
+    -30,-40,-40,-50,-50,-40,-40,-30,
+    -30,-40,-40,-50,-50,-40,-40,-30,
+    -30,-40,-40,-50,-50,-40,-40,-30,
+    -20,-30,-30,-40,-40,-30,-30,-20,
+    -10,-20,-20,-20,-20,-20,-20,-10,
+     20, 20,  0,  0,  0,  0, 20, 20,
+     20, 30, 10,  0,  0, 10, 30, 20
+  ]
+};
+
+function squareIndex(sq) {
+  const col = sq.charCodeAt(0) - 97;
+  const row = 8 - parseInt(sq[1]);
+  return row * 8 + col;
+}
+
+function evalBoard(g) {
+  const board = g.board();
+  let score = 0;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (!p) continue;
+      const idx = p.color === 'w' ? r * 8 + c : (7 - r) * 8 + c;
+      const val = PIECE_SCORE[p.type] + (PST[p.type] ? PST[p.type][idx] : 0);
+      score += p.color === 'w' ? val : -val;
     }
-  };
+  }
+  return score;
+}
+
+function minimax(g, depth, alpha, beta, maximizing) {
+  if (depth === 0 || g.game_over()) return evalBoard(g);
+  const moves = g.moves();
+  if (maximizing) {
+    let best = -Infinity;
+    for (const mv of moves) {
+      g.move(mv);
+      best = Math.max(best, minimax(g, depth - 1, alpha, beta, false));
+      g.undo();
+      alpha = Math.max(alpha, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  } else {
+    let best = Infinity;
+    for (const mv of moves) {
+      g.move(mv);
+      best = Math.min(best, minimax(g, depth - 1, alpha, beta, true));
+      g.undo();
+      beta = Math.min(beta, best);
+      if (beta <= alpha) break;
+    }
+    return best;
+  }
+}
+
+function getBestMove(g, depth) {
+  const moves = g.moves();
+  const aiColor = g.turn();
+  const maximizing = aiColor === 'w';
+  let bestMove = null;
+  let bestVal = maximizing ? -Infinity : Infinity;
+
+  // ordenar capturas primero para mejorar poda
+  moves.sort((a, b) => (b.includes('x') ? 1 : 0) - (a.includes('x') ? 1 : 0));
+
+  for (const mv of moves) {
+    g.move(mv);
+    const val = minimax(g, depth - 1, -Infinity, Infinity, !maximizing);
+    g.undo();
+    if (maximizing ? val > bestVal : val < bestVal) {
+      bestVal = val;
+      bestMove = mv;
+    }
+  }
+  return bestMove;
 }
 
 function makeAIMove() {
   if (game.game_over()) return;
-  showThinking(true);
-  stockfish.postMessage('position fen ' + game.fen());
-  stockfish.postMessage('go depth ' + aiDepth);
-  // status se actualiza cuando llega bestmove
-  setTimeout(() => showThinking(false), 100);
+  // depth map: fácil=1, medio=2, difícil=3
+  const depthMap = { 1: 1, 3: 2, 6: 3 };
+  const depth = depthMap[aiDepth] || 1;
+  setTimeout(() => {
+    const best = getBestMove(game, depth);
+    if (!best) return;
+    const result = game.move(best);
+    if (result) {
+      board.position(game.fen());
+      updateBars();
+      updateStatus();
+      removeHighlights();
+      highlightMove(result.from, result.to);
+    }
+  }, 30);
 }
 
 // ── Movimientos del jugador ──────────────────────────────────────
@@ -618,7 +737,7 @@ function updateStatus() {
   } else {
     const who = game.turn() === 'w' ? 'Blancas' : 'Negras';
     if (mode === 'ai' && game.turn() !== playerColor) {
-      el.innerHTML = '<span class="thinking"><span></span><span></span><span></span></span> Stockfish pensando…';
+      el.innerHTML = '<span class="thinking"><span></span><span></span><span></span></span> IA pensando…';
     } else {
       el.textContent = `Turno de ${who}`;
     }
@@ -673,8 +792,7 @@ function showThinking(show) {
 }
 
 function goToMenu() {
-  if (stockfish) { stockfish.terminate(); stockfish = null; }
-  document.getElementById('screen-game').style.display = 'none';
+document.getElementById('screen-game').style.display = 'none';
   const sm = document.getElementById('screen-menu');
   sm.style.display = 'flex';
   mode = null;
