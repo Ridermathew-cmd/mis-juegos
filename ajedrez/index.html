@@ -277,6 +277,23 @@
     .thinking span:nth-child(3) { animation-delay: 0.3s; }
     @keyframes bounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
 
+    /* ── REY MUERE ── */
+    @keyframes kingDie {
+      0%   { transform: rotate(0deg)   scale(1)    translateY(0);   opacity: 1; }
+      15%  { transform: rotate(-20deg) scale(1.1)  translateY(-4px); opacity: 1; }
+      35%  { transform: rotate(25deg)  scale(0.95) translateY(2px);  opacity: 1; }
+      55%  { transform: rotate(-15deg) scale(0.9)  translateY(0);    opacity: 0.9; }
+      70%  { transform: rotate(90deg)  scale(0.8)  translateY(6px);  opacity: 0.6; }
+      85%  { transform: rotate(100deg) scale(0.5)  translateY(14px); opacity: 0.3; }
+      100% { transform: rotate(110deg) scale(0.2)  translateY(20px); opacity: 0; }
+    }
+    .king-dying {
+      animation: kingDie 1s cubic-bezier(.36,.07,.19,.97) forwards !important;
+      transform-origin: center bottom;
+      z-index: 50;
+      position: relative;
+    }
+
     /* ── PUNTOS CASILLAS VÁLIDAS ── */
     .valid-move-dot::after {
       content: '';
@@ -688,6 +705,22 @@ function clearValidMoves() {
 }
 
 // ── Gameover overlay ──────────────────────────────────────────────
+function animateKingDeath(color) {
+  // encontrar casilla del rey perdedor
+  let kingSquare = null;
+  game.board().forEach((row, r) => row.forEach((p, c) => {
+    if (p && p.type === 'k' && p.color === color) {
+      const files = 'abcdefgh';
+      kingSquare = files[c] + (8 - r);
+    }
+  }));
+  if (!kingSquare) return;
+  // buscar la imagen de la pieza en esa casilla y animarla
+  const sq = $(`[data-square="${kingSquare}"]`);
+  const img = sq.find('img');
+  if (img.length) img.addClass('king-dying');
+}
+
 function showGameover(title, crown, sub) {
   stopTimer();
   document.getElementById('gameover-crown').textContent = crown || '♛';
@@ -1038,10 +1071,12 @@ function updateStatus() {
   el.className = 'status-bar';
   if (game.in_checkmate()) {
     stopTimer();
-    const winner = game.turn() === 'w' ? 'Negras' : 'Blancas';
+    const loser = game.turn(); // el que está en jaque mate
+    const winner = loser === 'w' ? 'Negras' : 'Blancas';
     el.textContent = `¡Jaque mate! Ganan ${winner}`;
     el.classList.add('gameover');
-    setTimeout(() => showGameover(`¡Ganan ${winner}!`, '🏆', 'Jaque mate'), 400);
+    animateKingDeath(loser);
+    setTimeout(() => showGameover(`¡Ganan ${winner}!`, '🏆', 'Jaque mate'), 1100);
   } else if (game.in_draw()) {
     stopTimer();
     el.textContent = 'Tablas ½-½'; el.classList.add('gameover');
