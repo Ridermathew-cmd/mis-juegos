@@ -912,7 +912,10 @@ function launchBoard(orientation) {
     orientation,
     onDragStart,
     onDrop,
-    onSnapEnd: () => board.position(game.fen()),
+    onSnapEnd: () => {
+      board.position(game.fen());
+      if (game.in_checkmate()) animateKingDeath(game.turn());
+    },
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
   });
   updateBars();
