@@ -381,6 +381,33 @@
     }
     .gameover-btn:hover { opacity: 0.85; }
 
+    /* ── PANTALLA NOMBRE ── */
+    #screen-name {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; padding: 32px 16px;
+    }
+    .name-logo { font-size: 3.5rem; margin-bottom: 8px; }
+    #screen-name h2 { font-size: 1.3rem; font-weight: 700; }
+    #screen-name p { font-size: 0.9rem; color: var(--text-muted); }
+    .name-input {
+      width: 100%; max-width: 360px; padding: 14px 16px;
+      font-size: 1.1rem; font-weight: 600;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 12px; color: var(--text); outline: none;
+      transition: border-color 0.2s;
+    }
+    .name-input:focus { border-color: var(--accent2); }
+    .name-input.error { border-color: var(--danger); }
+    .name-error { color: var(--danger); font-size: 0.82rem; min-height: 18px; }
+    .name-confirm-btn {
+      width: 100%; max-width: 360px; padding: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .name-confirm-btn:hover { opacity: 0.9; }
+
     @media (max-width: 480px) { #board-wrap { max-width: 100%; } }
   </style>
 </head>
@@ -390,6 +417,17 @@
   <h1>♟ Ajedrez</h1>
   <a href="../index.html" class="back-btn">← Volver</a>
 </header>
+
+<!-- PANTALLA NOMBRE -->
+<div id="screen-name">
+  <div class="name-logo">♟</div>
+  <h2>¿Cómo te llamas?</h2>
+  <p>Tu nombre aparecerá en el tablero</p>
+  <input class="name-input" id="name-input" maxlength="20" placeholder="Ingresa tu nombre"
+    onkeydown="if(event.key==='Enter') confirmName()" />
+  <div class="name-error" id="name-error"></div>
+  <button class="name-confirm-btn" onclick="confirmName()">Continuar →</button>
+</div>
 
 <!-- MENÚ PRINCIPAL -->
 <div id="screen-menu">
@@ -562,11 +600,37 @@ let roomListener = null;
 
 // ── Navegación de pantallas ───────────────────────────────────────
 function showScreen(id) {
-  ['screen-menu','screen-online','screen-waiting','screen-join','screen-game']
+  ['screen-name','screen-menu','screen-online','screen-waiting','screen-join','screen-game']
     .forEach(s => document.getElementById(s).style.display = 'none');
-  const el = document.getElementById(id);
-  el.style.display = (id === 'screen-game') ? 'flex' : 'flex';
+  document.getElementById(id).style.display = 'flex';
 }
+
+// ── NOMBRE ────────────────────────────────────────────────────────
+let myName = localStorage.getItem('chess_name') || '';
+
+function initNameScreen() {
+  if (myName) {
+    showScreen('screen-menu');
+  } else {
+    showScreen('screen-name');
+  }
+}
+
+function confirmName() {
+  const val = document.getElementById('name-input').value.trim();
+  if (!val) {
+    document.getElementById('name-input').classList.add('error');
+    document.getElementById('name-error').textContent = 'Debes ingresar un nombre para continuar';
+    document.getElementById('name-input').focus();
+    return;
+  }
+  myName = val;
+  localStorage.setItem('chess_name', myName);
+  showScreen('screen-menu');
+}
+
+// arrancar
+initNameScreen();
 
 // ── MENÚ PRINCIPAL ────────────────────────────────────────────────
 function selectMode(m) {
@@ -904,8 +968,34 @@ function startOnlineGame(color) {
   });
 }
 
+function setPlayerNames(orientation) {
+  const topEl    = document.getElementById('name-top');
+  const bottomEl = document.getElementById('name-bottom');
+  if (mode === 'ai') {
+    if (orientation === 'white') {
+      bottomEl.textContent = '♔ ' + myName;
+      topEl.textContent    = '♚ Máquina';
+    } else {
+      topEl.textContent    = '♔ ' + myName;
+      bottomEl.textContent = '♚ Máquina';
+    }
+  } else if (mode === 'online') {
+    if (orientation === 'white') {
+      bottomEl.textContent = '♔ ' + myName;
+      topEl.textContent    = '♚ Oponente';
+    } else {
+      topEl.textContent    = '♔ ' + myName;
+      bottomEl.textContent = '♚ Oponente';
+    }
+  } else {
+    bottomEl.textContent = '♔ ' + myName;
+    topEl.textContent    = '♚ Jugador 2';
+  }
+}
+
 function launchBoard(orientation) {
   showScreen('screen-game');
+  setPlayerNames(orientation);
   board = Chessboard('board', {
     draggable: true,
     position: 'start',
