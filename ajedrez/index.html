@@ -438,6 +438,79 @@
       background: none; border: none; cursor: pointer; text-decoration: underline;
     }
 
+    /* ── CONFIGURACIÓN ── */
+    .settings-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.3rem; cursor: pointer; padding: 4px 8px;
+      transition: color 0.2s;
+    }
+    .settings-btn:hover { color: var(--text); }
+
+    #screen-settings {
+      display: none; flex-direction: column;
+      align-items: center; gap: 0;
+      width: 100%; max-width: 420px;
+      padding: 0 16px 32px;
+    }
+    .settings-header {
+      width: 100%; display: flex; align-items: center;
+      padding: 20px 0 24px; gap: 12px;
+    }
+    .settings-header h2 { font-size: 1.2rem; font-weight: 700; flex: 1; }
+    .settings-back {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.4rem; cursor: pointer; padding: 4px;
+    }
+    .settings-section {
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; margin-bottom: 14px;
+    }
+    .settings-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px; cursor: pointer; transition: background 0.15s;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-row:last-child { border-bottom: none; }
+    .settings-row:hover { background: rgba(255,255,255,0.03); }
+    .settings-row .row-left { display: flex; align-items: center; gap: 12px; }
+    .settings-row .row-icon { font-size: 1.2rem; }
+    .settings-row .row-label { font-size: 0.95rem; font-weight: 500; }
+    .settings-row .row-value { font-size: 0.82rem; color: var(--text-muted); }
+    .settings-row .row-arrow { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* toggle sonido */
+    .toggle {
+      width: 44px; height: 24px; border-radius: 12px;
+      background: var(--border); position: relative;
+      transition: background 0.2s; cursor: pointer; flex-shrink: 0;
+    }
+    .toggle.on { background: var(--accent2); }
+    .toggle::after {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: white; top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle.on::after { transform: translateX(20px); }
+
+    /* editar nombre inline */
+    #settings-name-input {
+      width: 100%; max-width: 360px; padding: 12px 14px;
+      font-size: 1rem; font-weight: 600;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 10px; color: var(--text); outline: none;
+      transition: border-color 0.2s; display: none; margin-bottom: 8px;
+    }
+    #settings-name-input:focus { border-color: var(--accent2); }
+    .settings-save-btn {
+      width: 100%; max-width: 360px; padding: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      display: none; margin-bottom: 14px;
+    }
+
     @media (max-width: 480px) { #board-wrap { max-width: 100%; } }
   </style>
 </head>
@@ -445,7 +518,10 @@
 
 <header>
   <h1>♟ Ajedrez</h1>
-  <a href="../index.html" class="back-btn">← Volver</a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="settings-btn" onclick="openSettings()" title="Configuración">⚙️</button>
+    <a href="../index.html" class="back-btn">← Volver</a>
+  </div>
 </header>
 
 <!-- PANTALLA NOMBRE -->
@@ -497,6 +573,58 @@
   <div class="name-error" id="pin-login-error"></div>
   <div class="pin-pad" id="pad-login"></div>
   <button class="pin-change-link" onclick="resetProfile()">No soy yo — cambiar perfil</button>
+</div>
+
+<!-- CONFIGURACIÓN -->
+<div id="screen-settings">
+  <div class="settings-header">
+    <button class="settings-back" onclick="closeSettings()">←</button>
+    <h2>Configuración</h2>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-row" onclick="toggleNameEdit()">
+      <div class="row-left">
+        <span class="row-icon">👤</span>
+        <div>
+          <div class="row-label">Nombre</div>
+          <div class="row-value" id="settings-name-display"></div>
+        </div>
+      </div>
+      <span class="row-arrow">✏️</span>
+    </div>
+    <div class="settings-row" onclick="goChangePIN()">
+      <div class="row-left">
+        <span class="row-icon">🔒</span>
+        <div><div class="row-label">Cambiar PIN</div></div>
+      </div>
+      <span class="row-arrow">›</span>
+    </div>
+  </div>
+
+  <input class="name-input" id="settings-name-input" maxlength="20" placeholder="Nuevo nombre"
+    style="display:none;width:100%;max-width:360px;margin-bottom:8px;"
+    onkeydown="if(event.key==='Enter') saveNewName()" />
+  <button class="name-confirm-btn" id="settings-save-btn" style="display:none;max-width:360px;" onclick="saveNewName()">Guardar nombre</button>
+
+  <div class="settings-section">
+    <div class="settings-row" onclick="toggleSound()">
+      <div class="row-left">
+        <span class="row-icon">🔊</span>
+        <div><div class="row-label">Sonidos</div></div>
+      </div>
+      <div class="toggle" id="sound-toggle"></div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-row" onclick="resetProfile()" style="color:var(--danger);">
+      <div class="row-left">
+        <span class="row-icon">🚪</span>
+        <div><div class="row-label" style="color:var(--danger);">Cerrar sesión</div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- MENÚ PRINCIPAL -->
@@ -670,7 +798,7 @@ let roomListener = null;
 
 // ── Navegación de pantallas ───────────────────────────────────────
 const ALL_SCREENS = ['screen-name','screen-pin-create','screen-pin-confirm',
-  'screen-pin-login','screen-menu','screen-online','screen-waiting','screen-join','screen-game'];
+  'screen-pin-login','screen-settings','screen-menu','screen-online','screen-waiting','screen-join','screen-game'];
 
 function showScreen(id) {
   ALL_SCREENS.forEach(s => document.getElementById(s).style.display = 'none');
@@ -799,6 +927,61 @@ function resetProfile() {
 // arrancar
 initAuth();
 
+// ── CONFIGURACIÓN ─────────────────────────────────────────────────
+let soundEnabled = localStorage.getItem('chess_sound') !== 'off';
+let settingsFrom = 'menu'; // pantalla desde donde se abrió
+
+function openSettings() {
+  settingsFrom = 'menu';
+  document.getElementById('settings-name-display').textContent = myName;
+  document.getElementById('settings-name-input').style.display = 'none';
+  document.getElementById('settings-save-btn').style.display = 'none';
+  document.getElementById('sound-toggle').className = 'toggle' + (soundEnabled ? ' on' : '');
+  ALL_SCREENS.forEach(s => document.getElementById(s).style.display = 'none');
+  document.getElementById('screen-settings').style.display = 'flex';
+}
+
+function closeSettings() {
+  showScreen('screen-' + settingsFrom);
+}
+
+function toggleNameEdit() {
+  const inp = document.getElementById('settings-name-input');
+  const btn = document.getElementById('settings-save-btn');
+  const visible = inp.style.display !== 'none';
+  inp.style.display = visible ? 'none' : 'block';
+  btn.style.display = visible ? 'none' : 'block';
+  if (!visible) { inp.value = myName; inp.focus(); }
+}
+
+function saveNewName() {
+  const val = document.getElementById('settings-name-input').value.trim();
+  if (!val) return;
+  myName = val;
+  localStorage.setItem('chess_name', myName);
+  document.getElementById('settings-name-display').textContent = myName;
+  document.getElementById('settings-name-input').style.display = 'none';
+  document.getElementById('settings-save-btn').style.display = 'none';
+}
+
+function goChangePIN() {
+  settingsFrom = 'settings';
+  pinBuffers.create = '';
+  pinFirst = '';
+  buildPinPad('create');
+  updatePinDots('create', '');
+  document.getElementById('pin-create-error').textContent = '';
+  ALL_SCREENS.forEach(s => document.getElementById(s).style.display = 'none');
+  document.getElementById('screen-settings').style.display = 'none';
+  document.getElementById('screen-pin-create').style.display = 'flex';
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('chess_sound', soundEnabled ? 'on' : 'off');
+  document.getElementById('sound-toggle').className = 'toggle' + (soundEnabled ? ' on' : '');
+}
+
 // ── MENÚ PRINCIPAL ────────────────────────────────────────────────
 function selectMode(m) {
   if (m === 'online') {
@@ -824,6 +1007,7 @@ function selectTime(btn, mins) {
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
+  if (!soundEnabled) return;
   const ctx = audioCtx;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
