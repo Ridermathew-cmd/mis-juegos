@@ -279,11 +279,11 @@
 
     /* ── REY MUERE ── */
     @keyframes kingDie {
-      0%   { transform: scale(1.6) rotate(0deg);   filter: drop-shadow(0 0 0px red); }
-      15%  { transform: scale(1.6) rotate(-18deg); filter: drop-shadow(0 0 4px red); }
-      35%  { transform: scale(1.6) rotate(10deg);  filter: drop-shadow(0 0 8px red) grayscale(0.5); }
-      60%  { transform: scale(1.6) rotate(60deg);  filter: drop-shadow(0 0 14px red) grayscale(1) sepia(1) hue-rotate(300deg) saturate(8) brightness(0.8); }
-      100% { transform: scale(1.6) rotate(90deg);  filter: drop-shadow(0 0 20px red) grayscale(1) sepia(1) hue-rotate(300deg) saturate(20) brightness(0.7); }
+      0%   { transform: rotate(0deg);   filter: none; }
+      15%  { transform: rotate(-12deg); filter: none; }
+      30%  { transform: rotate(8deg);   filter: brightness(1) saturate(1); }
+      55%  { transform: rotate(55deg);  filter: brightness(0.8) saturate(3) sepia(1) hue-rotate(300deg); }
+      100% { transform: rotate(90deg);  filter: brightness(0.6) saturate(20) sepia(1) hue-rotate(300deg) contrast(2); }
     }
     .king-dying {
       animation: kingDie 2.5s ease-in-out forwards !important;
