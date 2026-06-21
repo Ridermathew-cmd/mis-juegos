@@ -489,7 +489,7 @@ function startGame() {
 
   // Si el jugador eligió negras, la IA mueve primero
   if (mode === 'ai' && playerColor === 'b') {
-    setTimeout(makeAIMove, 500);
+    setTimeout(makeAIMove, 200);
   }
 
   initStockfish();
@@ -567,7 +567,7 @@ function onDrop(source, target) {
   updateStatus();
 
   if (mode === 'ai' && !game.game_over()) {
-    setTimeout(makeAIMove, 300);
+    setTimeout(makeAIMove, 80);
   }
 }
 
@@ -581,7 +581,7 @@ function promote(piece) {
   updateBars();
   updateStatus();
   if (mode === 'ai' && !game.game_over()) {
-    setTimeout(makeAIMove, 300);
+    setTimeout(makeAIMove, 80);
   }
 }
 
