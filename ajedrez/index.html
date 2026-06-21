@@ -460,6 +460,12 @@
       transition: color 0.2s;
     }
     .settings-btn:hover { color: var(--text); }
+    .music-btn {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.2rem; cursor: pointer; padding: 4px 8px;
+      transition: color 0.2s;
+    }
+    .music-btn.playing { color: var(--accent2); }
 
     #screen-settings {
       display: none; flex-direction: column;
@@ -534,6 +540,7 @@
 <header>
   <h1>♟ Ajedrez</h1>
   <div style="display:flex;align-items:center;gap:8px;">
+    <button class="music-btn" id="music-btn" onclick="toggleMusic()" title="Música">🎵</button>
     <button class="settings-btn" onclick="openSettings()" title="Configuración">⚙️</button>
     <a href="../index.html" class="back-btn">← Volver</a>
   </div>
@@ -1020,6 +1027,111 @@ function selectTime(btn, mins) {
 
 // ── Sonidos (Web Audio API) ───────────────────────────────────────
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// ── MÚSICA LO-FI ─────────────────────────────────────────────────
+let musicPlaying = false;
+let musicNodes = [];
+let musicScheduler = null;
+let musicBeat = 0;
+
+const BPM = 72;
+const BEAT = 60 / BPM;
+
+// Progresión Am - F - C - G con notas graves + agudas
+const PROGRESSION = [
+  { bass: 110.0, notes: [220.0, 261.6, 329.6] }, // Am
+  { bass: 87.3,  notes: [174.6, 220.0, 261.6] }, // F
+  { bass: 130.8, notes: [261.6, 329.6, 392.0] }, // C
+  { bass: 98.0,  notes: [196.0, 246.9, 293.7] }, // G
+];
+
+function createReverb(ctx) {
+  const convolver = ctx.createConvolver();
+  const rate = ctx.sampleRate;
+  const length = rate * 1.5;
+  const buf = ctx.createBuffer(2, length, rate);
+  for (let c = 0; c < 2; c++) {
+    const data = buf.getChannelData(c);
+    for (let i = 0; i < length; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5);
+    }
+  }
+  convolver.buffer = buf;
+  return convolver;
+}
+
+function playLofiNote(freq, time, duration, gainVal, type = 'sine') {
+  const ctx = audioCtx;
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1200;
+
+  osc.type = type;
+  osc.frequency.value = freq;
+  // slight detune for warmth
+  osc.detune.value = (Math.random() - 0.5) * 8;
+
+  gain.gain.setValueAtTime(0, time);
+  gain.gain.linearRampToValueAtTime(gainVal, time + 0.04);
+  gain.gain.exponentialRampToValueAtTime(gainVal * 0.4, time + duration * 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(time);
+  osc.stop(time + duration + 0.05);
+  musicNodes.push(osc);
+}
+
+function scheduleChord() {
+  if (!musicPlaying) return;
+  const ctx = audioCtx;
+  const now = ctx.currentTime;
+  const chord = PROGRESSION[musicBeat % PROGRESSION.length];
+  const chordDur = BEAT * 4; // un compás por acorde
+
+  // bajo
+  playLofiNote(chord.bass, now, chordDur * 0.9, 0.18, 'triangle');
+
+  // acordes en arpegio suave
+  chord.notes.forEach((freq, i) => {
+    playLofiNote(freq, now + i * BEAT * 0.3, chordDur * 0.7, 0.08, 'sine');
+  });
+
+  // nota alta ocasional (melodía simple)
+  if (Math.random() > 0.4) {
+    const mel = chord.notes[Math.floor(Math.random() * chord.notes.length)] * 2;
+    playLofiNote(mel, now + BEAT * (1 + Math.random()), BEAT * 0.6, 0.05, 'sine');
+  }
+
+  musicBeat++;
+  musicScheduler = setTimeout(scheduleChord, chordDur * 1000);
+}
+
+function startMusic() {
+  if (musicPlaying) return;
+  musicPlaying = true;
+  musicBeat = 0;
+  document.getElementById('music-btn').classList.add('playing');
+  scheduleChord();
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  clearTimeout(musicScheduler);
+  musicNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes = [];
+  document.getElementById('music-btn').classList.remove('playing');
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic();
+  else startMusic();
+}
 
 function playSound(type) {
   if (!soundEnabled) return;
