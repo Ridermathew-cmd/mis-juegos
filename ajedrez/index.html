@@ -408,6 +408,36 @@
     }
     .name-confirm-btn:hover { opacity: 0.9; }
 
+    /* ── PIN ── */
+    .pin-dots {
+      display: flex; gap: 14px; justify-content: center; margin: 8px 0;
+    }
+    .pin-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: transparent;
+      transition: all 0.2s;
+    }
+    .pin-dot.filled { background: var(--accent2); border-color: var(--accent2); }
+    .pin-dot.error  { border-color: var(--danger); background: var(--danger); }
+    .pin-pad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; width: 100%; max-width: 260px;
+    }
+    .pin-key {
+      padding: 16px; border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface); color: var(--text);
+      font-size: 1.3rem; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; text-align: center; user-select: none;
+    }
+    .pin-key:active { background: rgba(124,58,237,0.2); border-color: var(--accent2); transform: scale(0.95); }
+    .pin-key.del { font-size: 1rem; color: var(--text-muted); }
+    .pin-welcome { font-size: 1rem; color: var(--text-muted); }
+    .pin-welcome strong { color: var(--text); }
+    .pin-change-link {
+      color: var(--text-muted); font-size: 0.82rem;
+      background: none; border: none; cursor: pointer; text-decoration: underline;
+    }
+
     @media (max-width: 480px) { #board-wrap { max-width: 100%; } }
   </style>
 </head>
@@ -427,6 +457,46 @@
     onkeydown="if(event.key==='Enter') confirmName()" />
   <div class="name-error" id="name-error"></div>
   <button class="name-confirm-btn" onclick="confirmName()">Continuar →</button>
+</div>
+
+<!-- PANTALLA CREAR PIN -->
+<div id="screen-pin-create" style="display:none;flex-direction:column;align-items:center;gap:18px;padding:32px 16px;">
+  <div class="name-logo">🔒</div>
+  <h2>Crea tu PIN</h2>
+  <p style="color:var(--text-muted);font-size:0.9rem;">4 dígitos para proteger tu perfil</p>
+  <div class="pin-dots" id="dots-create">
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="name-error" id="pin-create-error"></div>
+  <div class="pin-pad" id="pad-create"></div>
+</div>
+
+<!-- PANTALLA CONFIRMAR PIN -->
+<div id="screen-pin-confirm" style="display:none;flex-direction:column;align-items:center;gap:18px;padding:32px 16px;">
+  <div class="name-logo">🔒</div>
+  <h2>Confirma tu PIN</h2>
+  <p style="color:var(--text-muted);font-size:0.9rem;">Ingresa el PIN nuevamente</p>
+  <div class="pin-dots" id="dots-confirm">
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="name-error" id="pin-confirm-error"></div>
+  <div class="pin-pad" id="pad-confirm"></div>
+</div>
+
+<!-- PANTALLA LOGIN PIN -->
+<div id="screen-pin-login" style="display:none;flex-direction:column;align-items:center;gap:18px;padding:32px 16px;">
+  <div class="name-logo">♟</div>
+  <p class="pin-welcome">Bienvenido, <strong id="pin-login-name"></strong></p>
+  <h2>Ingresa tu PIN</h2>
+  <div class="pin-dots" id="dots-login">
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+    <div class="pin-dot"></div><div class="pin-dot"></div>
+  </div>
+  <div class="name-error" id="pin-login-error"></div>
+  <div class="pin-pad" id="pad-login"></div>
+  <button class="pin-change-link" onclick="resetProfile()">No soy yo — cambiar perfil</button>
 </div>
 
 <!-- MENÚ PRINCIPAL -->
@@ -599,20 +669,28 @@ let roomRef = null;
 let roomListener = null;
 
 // ── Navegación de pantallas ───────────────────────────────────────
+const ALL_SCREENS = ['screen-name','screen-pin-create','screen-pin-confirm',
+  'screen-pin-login','screen-menu','screen-online','screen-waiting','screen-join','screen-game'];
+
 function showScreen(id) {
-  ['screen-name','screen-menu','screen-online','screen-waiting','screen-join','screen-game']
-    .forEach(s => document.getElementById(s).style.display = 'none');
+  ALL_SCREENS.forEach(s => document.getElementById(s).style.display = 'none');
   document.getElementById(id).style.display = 'flex';
 }
 
-// ── NOMBRE ────────────────────────────────────────────────────────
+// ── NOMBRE + PIN ──────────────────────────────────────────────────
 let myName = localStorage.getItem('chess_name') || '';
+let myPin  = localStorage.getItem('chess_pin')  || '';
 
-function initNameScreen() {
-  if (myName) {
-    showScreen('screen-menu');
-  } else {
+function initAuth() {
+  if (!myName) {
     showScreen('screen-name');
+  } else if (!myPin) {
+    buildPinPad('create');
+    showScreen('screen-pin-create');
+  } else {
+    document.getElementById('pin-login-name').textContent = myName;
+    buildPinPad('login');
+    showScreen('screen-pin-login');
   }
 }
 
@@ -626,11 +704,100 @@ function confirmName() {
   }
   myName = val;
   localStorage.setItem('chess_name', myName);
-  showScreen('screen-menu');
+  buildPinPad('create');
+  showScreen('screen-pin-create');
+}
+
+// ── PIN PAD ───────────────────────────────────────────────────────
+let pinBuffers = { create: '', confirm: '', login: '' };
+let pinFirst = ''; // primer PIN ingresado para comparar en confirm
+
+function buildPinPad(context) {
+  const pad = document.getElementById('pad-' + context);
+  pad.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'','0','⌫'].forEach(k => {
+    const btn = document.createElement('button');
+    btn.className = 'pin-key' + (k === '⌫' ? ' del' : '');
+    btn.textContent = k;
+    if (k === '') { btn.style.visibility = 'hidden'; pad.appendChild(btn); return; }
+    btn.onclick = () => pinKeyPress(context, String(k));
+    pad.appendChild(btn);
+  });
+}
+
+function pinKeyPress(ctx, key) {
+  const buf = pinBuffers;
+  if (key === '⌫') {
+    buf[ctx] = buf[ctx].slice(0, -1);
+  } else {
+    if (buf[ctx].length >= 4) return;
+    buf[ctx] += key;
+  }
+  updatePinDots(ctx, buf[ctx]);
+  if (buf[ctx].length === 4) setTimeout(() => pinComplete(ctx), 120);
+}
+
+function updatePinDots(ctx, val, errorState = false) {
+  const dots = document.getElementById('dots-' + ctx).children;
+  for (let i = 0; i < 4; i++) {
+    dots[i].classList.toggle('filled', i < val.length && !errorState);
+    dots[i].classList.toggle('error', errorState);
+  }
+}
+
+function pinComplete(ctx) {
+  const val = pinBuffers[ctx];
+  if (ctx === 'create') {
+    pinFirst = val;
+    pinBuffers.confirm = '';
+    buildPinPad('confirm');
+    updatePinDots('confirm', '');
+    showScreen('screen-pin-confirm');
+  } else if (ctx === 'confirm') {
+    if (val !== pinFirst) {
+      updatePinDots('confirm', val, true);
+      document.getElementById('pin-confirm-error').textContent = 'Los PINs no coinciden, intenta de nuevo';
+      setTimeout(() => {
+        pinBuffers.confirm = '';
+        pinFirst = '';
+        updatePinDots('confirm', '');
+        document.getElementById('pin-confirm-error').textContent = '';
+        buildPinPad('create');
+        showScreen('screen-pin-create');
+        pinBuffers.create = '';
+        updatePinDots('create', '');
+      }, 1200);
+    } else {
+      myPin = val;
+      localStorage.setItem('chess_pin', myPin);
+      showScreen('screen-menu');
+    }
+  } else if (ctx === 'login') {
+    if (val !== myPin) {
+      updatePinDots('login', val, true);
+      document.getElementById('pin-login-error').textContent = 'PIN incorrecto';
+      setTimeout(() => {
+        pinBuffers.login = '';
+        updatePinDots('login', '');
+        document.getElementById('pin-login-error').textContent = '';
+      }, 900);
+    } else {
+      showScreen('screen-menu');
+    }
+  }
+}
+
+function resetProfile() {
+  localStorage.removeItem('chess_name');
+  localStorage.removeItem('chess_pin');
+  myName = ''; myPin = '';
+  pinBuffers = { create: '', confirm: '', login: '' };
+  document.getElementById('name-input').value = '';
+  showScreen('screen-name');
 }
 
 // arrancar
-initNameScreen();
+initAuth();
 
 // ── MENÚ PRINCIPAL ────────────────────────────────────────────────
 function selectMode(m) {
