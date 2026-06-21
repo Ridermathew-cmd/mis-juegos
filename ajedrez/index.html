@@ -279,17 +279,32 @@
 
     /* ── REY MUERE ── */
     @keyframes kingDie {
-      0%   { transform: rotate(0deg);   filter: none; }
-      15%  { transform: rotate(-12deg); filter: none; }
-      30%  { transform: rotate(8deg);   filter: brightness(1) saturate(1); }
-      55%  { transform: rotate(55deg);  filter: brightness(0.8) saturate(3) sepia(1) hue-rotate(300deg); }
-      100% { transform: rotate(90deg);  filter: brightness(0.6) saturate(20) sepia(1) hue-rotate(300deg) contrast(2); }
+      0%   { transform: rotate(0deg);   }
+      15%  { transform: rotate(-12deg); }
+      30%  { transform: rotate(8deg);   }
+      55%  { transform: rotate(55deg);  }
+      100% { transform: rotate(90deg);  }
+    }
+    @keyframes kingRed {
+      0%   { opacity: 0; }
+      40%  { opacity: 0; }
+      100% { opacity: 1; }
     }
     .king-dying {
       animation: kingDie 2.5s ease-in-out forwards !important;
       transform-origin: bottom center;
       z-index: 100 !important;
       position: relative !important;
+    }
+    .king-dying::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: #cc0000;
+      mix-blend-mode: multiply;
+      border-radius: 4px;
+      animation: kingRed 2.5s ease-in-out forwards;
+      pointer-events: none;
     }
 
     /* ── PUNTOS CASILLAS VÁLIDAS ── */
