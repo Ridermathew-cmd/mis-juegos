@@ -453,6 +453,66 @@
       background: none; border: none; cursor: pointer; text-decoration: underline;
     }
 
+    /* ── GOOGLE BTN ── */
+    .google-btn {
+      width: 100%; max-width: 360px; padding: 14px;
+      background: white; color: #333; border: 1px solid #ddd;
+      border-radius: 12px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 10px; transition: box-shadow 0.2s;
+    }
+    .google-btn:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+    .google-btn img { width: 20px; height: 20px; }
+    .divider {
+      width: 100%; max-width: 360px;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-muted); font-size: 0.82rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
+    .guest-link {
+      color: var(--text-muted); font-size: 0.88rem;
+      background: none; border: none; cursor: pointer;
+      text-decoration: underline; padding: 4px;
+    }
+
+    /* ── TUTORIAL ── */
+    #screen-tutorial {
+      display: none; flex-direction: column;
+      align-items: center; gap: 0;
+      width: 100%; max-width: 420px; padding: 0 16px 32px;
+    }
+    .tutorial-header {
+      width: 100%; display: flex; align-items: center;
+      padding: 20px 0 16px; gap: 12px;
+    }
+    .tutorial-header h2 { font-size: 1.2rem; font-weight: 700; flex: 1; }
+    .tut-back { background: none; border: none; color: var(--text-muted); font-size: 1.4rem; cursor: pointer; }
+    .tut-slide {
+      width: 100%; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 16px;
+      padding: 24px; text-align: center; min-height: 260px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 12px;
+    }
+    .tut-piece { font-size: 4rem; line-height: 1; }
+    .tut-name { font-size: 1.2rem; font-weight: 700; }
+    .tut-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; max-width: 300px; }
+    .tut-nav { display: flex; align-items: center; gap: 16px; margin-top: 20px; width: 100%; justify-content: center; }
+    .tut-nav-btn {
+      padding: 10px 24px; border: 1px solid var(--border);
+      border-radius: 10px; background: var(--surface);
+      color: var(--text); cursor: pointer; font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .tut-nav-btn:hover { border-color: var(--accent2); }
+    .tut-nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .tut-counter { font-size: 0.82rem; color: var(--text-muted); min-width: 50px; text-align: center; }
+    .tut-dots { display: flex; gap: 6px; margin-top: 12px; }
+    .tut-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+    .tut-dot.active { background: var(--accent2); }
+
     /* ── CONFIGURACIÓN ── */
     .settings-btn {
       background: none; border: none; color: var(--text-muted);
@@ -546,15 +606,23 @@
   </div>
 </header>
 
-<!-- PANTALLA NOMBRE -->
+<!-- PANTALLA LOGIN -->
 <div id="screen-name">
   <div class="name-logo">♟</div>
-  <h2>¿Cómo te llamas?</h2>
-  <p>Tu nombre aparecerá en el tablero</p>
-  <input class="name-input" id="name-input" maxlength="20" placeholder="Ingresa tu nombre"
+  <h2>Bienvenido</h2>
+  <p style="color:var(--text-muted);font-size:0.9rem;text-align:center;">Inicia sesión o juega como invitado</p>
+
+  <button class="google-btn" onclick="loginWithGoogle()">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+    Continuar con Google
+  </button>
+
+  <div class="divider">o</div>
+
+  <input class="name-input" id="name-input" maxlength="20" placeholder="Tu nombre (invitado)"
     onkeydown="if(event.key==='Enter') confirmName()" />
   <div class="name-error" id="name-error"></div>
-  <button class="name-confirm-btn" onclick="confirmName()">Continuar →</button>
+  <button class="name-confirm-btn" onclick="confirmName()">Jugar como invitado →</button>
 </div>
 
 <!-- PANTALLA CREAR PIN -->
@@ -649,6 +717,21 @@
   </div>
 </div>
 
+<!-- TUTORIAL -->
+<div id="screen-tutorial">
+  <div class="tutorial-header">
+    <button class="tut-back" onclick="closeTutorial()">←</button>
+    <h2>Cómo jugar</h2>
+  </div>
+  <div class="tut-slide" id="tut-slide"></div>
+  <div class="tut-dots" id="tut-dots"></div>
+  <div class="tut-nav">
+    <button class="tut-nav-btn" id="tut-prev" onclick="tutNav(-1)">← Anterior</button>
+    <span class="tut-counter" id="tut-counter"></span>
+    <button class="tut-nav-btn" id="tut-next" onclick="tutNav(1)">Siguiente →</button>
+  </div>
+</div>
+
 <!-- MENÚ PRINCIPAL -->
 <div id="screen-menu">
   <h2>Elige un modo de juego</h2>
@@ -695,6 +778,7 @@
   </div>
 
   <button class="start-btn" id="start-btn" onclick="startGame()">Jugar</button>
+  <button class="guest-link" onclick="openTutorial()">📖 ¿Cómo se juega al ajedrez?</button>
 </div>
 
 <!-- ONLINE: CREAR O UNIRSE -->
@@ -787,6 +871,7 @@
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
 // ── Firebase ─────────────────────────────────────────────────────
@@ -820,7 +905,8 @@ let roomListener = null;
 
 // ── Navegación de pantallas ───────────────────────────────────────
 const ALL_SCREENS = ['screen-name','screen-pin-create','screen-pin-confirm',
-  'screen-pin-login','screen-settings','screen-menu','screen-online','screen-waiting','screen-join','screen-game'];
+  'screen-pin-login','screen-settings','screen-tutorial','screen-menu',
+  'screen-online','screen-waiting','screen-join','screen-game'];
 
 function showScreen(id) {
   ALL_SCREENS.forEach(s => document.getElementById(s).style.display = 'none');
@@ -944,6 +1030,77 @@ function resetProfile() {
   pinBuffers = { create: '', confirm: '', login: '' };
   document.getElementById('name-input').value = '';
   showScreen('screen-name');
+}
+
+// ── GOOGLE LOGIN ──────────────────────────────────────────────────
+async function loginWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    const result = await firebase.auth().signInWithPopup(provider);
+    const user = result.user;
+    myName = user.displayName || user.email.split('@')[0];
+    localStorage.setItem('chess_name', myName);
+    localStorage.setItem('chess_google', '1');
+    localStorage.removeItem('chess_pin');
+    myPin = '';
+    showScreen('screen-menu');
+  } catch(e) {
+    document.getElementById('name-error').textContent = 'Error al iniciar con Google. Intenta como invitado.';
+  }
+}
+
+// ── TUTORIAL ──────────────────────────────────────────────────────
+const TUTORIAL_SLIDES = [
+  { piece: '♟', name: 'Peón', desc: 'Avanza una casilla hacia adelante. En su primer movimiento puede avanzar dos. Captura en diagonal. Si llega al final del tablero se convierte en otra pieza.' },
+  { piece: '♜', name: 'Torre', desc: 'Se mueve en línea recta: horizontalmente o verticalmente, tantas casillas como quiera. Participa en el enroque junto al rey.' },
+  { piece: '♞', name: 'Caballo', desc: 'Se mueve en forma de "L": dos casillas en una dirección y una en perpendicular. Es la única pieza que puede saltar sobre otras.' },
+  { piece: '♝', name: 'Alfil', desc: 'Se mueve en diagonal tantas casillas como quiera. Cada alfil siempre queda en casillas del mismo color.' },
+  { piece: '♛', name: 'Reina', desc: 'La pieza más poderosa. Se mueve en cualquier dirección (horizontal, vertical o diagonal) tantas casillas como quiera.' },
+  { piece: '♚', name: 'Rey', desc: 'Se mueve una casilla en cualquier dirección. Hay que protegerlo siempre. Si el rey no puede escapar del jaque es jaque mate y pierdes.' },
+  { piece: '👑', name: 'Objetivo', desc: 'El objetivo es dar jaque mate al rey del oponente: ponerlo en jaque sin que pueda escapar, capturar la pieza atacante ni bloquear el ataque.' },
+  { piece: '🏰', name: 'Enroque', desc: 'Movimiento especial: el rey se mueve dos casillas hacia una torre, y esa torre salta al otro lado del rey. Solo si ninguno se movió antes y el rey no está en jaque.' },
+];
+
+let tutIdx = 0;
+let tutFrom = 'menu';
+
+function openTutorial() {
+  tutFrom = 'menu';
+  tutIdx = 0;
+  renderTutSlide();
+  showScreen('screen-tutorial');
+}
+
+function closeTutorial() {
+  showScreen('screen-' + tutFrom);
+}
+
+function renderTutSlide() {
+  const s = TUTORIAL_SLIDES[tutIdx];
+  document.getElementById('tut-slide').innerHTML = `
+    <div class="tut-piece">${s.piece}</div>
+    <div class="tut-name">${s.name}</div>
+    <div class="tut-desc">${s.desc}</div>
+  `;
+  document.getElementById('tut-counter').textContent = `${tutIdx+1} / ${TUTORIAL_SLIDES.length}`;
+  document.getElementById('tut-prev').disabled = tutIdx === 0;
+  document.getElementById('tut-next').textContent = tutIdx === TUTORIAL_SLIDES.length-1 ? '✓ Listo' : 'Siguiente →';
+
+  const dotsEl = document.getElementById('tut-dots');
+  dotsEl.innerHTML = '';
+  TUTORIAL_SLIDES.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'tut-dot' + (i === tutIdx ? ' active' : '');
+    dotsEl.appendChild(d);
+  });
+}
+
+function tutNav(dir) {
+  if (dir === 1 && tutIdx === TUTORIAL_SLIDES.length - 1) {
+    closeTutorial(); return;
+  }
+  tutIdx = Math.max(0, Math.min(TUTORIAL_SLIDES.length-1, tutIdx + dir));
+  renderTutSlide();
 }
 
 // arrancar
