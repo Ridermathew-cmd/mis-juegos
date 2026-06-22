@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Harry Potter: La Aventura de Hogwarts</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root { --gold:#f0c040; --dark:#0a0510; --text:#f0e8d0; --hp:#e74c3c; --mp:#3498db; }
+body { background:var(--dark); color:var(--text); font-family:'Georgia',serif; height:100vh; overflow:hidden; }
+
+.screen { display:none; position:fixed; inset:0; flex-direction:column; align-items:center; justify-content:center; }
+.screen.active { display:flex; }
+
+#canvas3d { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
+
+#hud {
+  display:none; pointer-events:none; z-index:10; position:fixed; top:0; left:0; right:0;
+  padding:12px 16px;
+  background:linear-gradient(180deg,rgba(0,0,0,0.75) 0%,transparent 100%);
+}
+#hud.visible { display:flex; justify-content:space-between; align-items:center; }
+.hud-left { display:flex; flex-direction:column; gap:4px; }
+.hud-name { font-size:0.9em; color:var(--gold); text-shadow:0 0 8px rgba(240,192,64,0.6); }
+.hud-level { font-size:0.7em; color:#aaa; }
+.bars { display:flex; flex-direction:column; gap:4px; }
+.bar-row { display:flex; align-items:center; gap:6px; font-size:0.7em; }
+.bar-track { width:90px; height:7px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:4px; transition:width 0.4s; }
+.bar-hp { background:linear-gradient(90deg,#c0392b,#e74c3c); }
+.bar-mp { background:linear-gradient(90deg,#2980b9,#3498db); }
+.hud-map-btn { background:none; border:none; font-size:1.5em; cursor:pointer; pointer-events:all; }
+
+#bottom-panel {
+  position:fixed; bottom:0; left:0; right:0; z-index:20; pointer-events:all;
+  background:linear-gradient(0deg,rgba(5,2,15,0.97),rgba(5,2,15,0.88));
+  border-top:1px solid rgba(240,192,64,0.25); padding:12px 14px;
+  transform:translateY(100%); transition:transform 0.3s ease;
+}
+#bottom-panel.open { transform:translateY(0); }
+.panel-speaker { color:var(--gold); font-size:0.82em; font-weight:bold; margin-bottom:5px; }
+.panel-text { color:var(--text); font-size:0.88em; line-height:1.55; min-height:44px; }
+.panel-choices { display:flex; flex-direction:column; gap:7px; margin-top:10px; }
+.choice-btn {
+  padding:10px 14px; border-radius:9px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+  color:var(--text); cursor:pointer; font-family:Georgia,serif; font-size:0.86em; text-align:left; transition:all 0.18s;
+}
+.choice-btn:active { background:rgba(240,192,64,0.18); border-color:var(--gold); }
+
+#combat-panel {
+  position:fixed; bottom:0; left:0; right:0; z-index:20; pointer-events:all;
+  transform:translateY(100%); transition:transform 0.3s ease;
+}
+#combat-panel.open { transform:translateY(0); }
+.combat-top {
+  background:rgba(5,2,15,0.94); border-top:1px solid rgba(240,192,64,0.2); padding:10px 14px;
+}
+.enemy-row { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.enemy-bar-name { font-size:0.75em; color:#faa; min-width:130px; }
+.enemy-track { flex:1; height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+.enemy-bar-fill { height:100%; background:linear-gradient(90deg,#8b0000,#e74c3c); border-radius:4px; transition:width 0.4s; }
+.combat-log {
+  background:rgba(0,0,0,0.4); margin:6px 0; border-radius:8px; padding:7px 10px;
+  font-size:0.78em; max-height:52px; overflow-y:auto; line-height:1.5;
+}
+.log-magic{color:#aaf;} .log-dmg{color:#f88;} .log-heal{color:#8f8;} .log-win{color:var(--gold);font-weight:bold;}
+.spells-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:7px; padding:8px 14px 14px;
+  background:rgba(5,2,15,0.97);
+}
+.spell-btn {
+  padding:9px 8px; border-radius:9px; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1); color:var(--text); cursor:pointer;
+  font-family:Georgia,serif; display:flex; flex-direction:column; align-items:center; gap:2px; transition:all 0.18s;
+}
+.spell-btn:active:not(:disabled) { background:rgba(100,100,255,0.2); border-color:#88f; }
+.spell-btn:disabled { opacity:0.35; }
+.spell-icon { font-size:1.5em; }
+.spell-name { font-size:0.78em; color:var(--gold); font-style:italic; }
+.spell-stats { font-size:0.65em; color:#aaa; }
+
+#map-panel {
+  position:fixed; bottom:0; left:0; right:0; z-index:20; pointer-events:all;
+  background:linear-gradient(0deg,rgba(5,2,15,0.97),rgba(5,2,15,0.88));
+  border-top:1px solid rgba(240,192,64,0.2); padding:14px;
+  transform:translateY(100%); transition:transform 0.3s ease;
+}
+#map-panel.open { transform:translateY(0); }
+.map-title { color:var(--gold); font-size:0.9em; margin-bottom:10px; text-align:center; }
+.zones-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.zone-card {
+  padding:12px 10px; border-radius:11px; background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1); cursor:pointer; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:4px; transition:all 0.18s;
+}
+.zone-card.available { border-color:rgba(240,192,64,0.4); }
+.zone-card.locked { opacity:0.4; cursor:default; }
+.zone-card.completed { border-color:#27ae60; }
+.zone-card:active.available { background:rgba(240,192,64,0.12); }
+.zone-icon-big { font-size:2em; }
+.zone-name { font-size:0.78em; color:var(--gold); }
+.zone-status { font-size:0.65em; color:#888; }
+
+#screen-intro { background:radial-gradient(ellipse at 50% 30%,#2a1040 0%,#050010 100%); z-index:100; }
+.intro-content { text-align:center; z-index:2; position:relative; padding:20px; }
+.intro-title { font-size:2.4em; color:var(--gold); text-shadow:0 0 30px rgba(240,192,64,0.7),0 0 60px rgba(240,192,64,0.3); letter-spacing:3px; line-height:1.15; }
+.intro-sub { color:#ccbbdd; font-size:0.9em; margin:8px 0 28px; font-style:italic; }
+#stars-bg { position:absolute; inset:0; pointer-events:none; }
+.star { position:absolute; background:white; border-radius:50%; animation:twinkle 2s infinite alternate; }
+@keyframes twinkle { from{opacity:0.15} to{opacity:1} }
+
+#screen-create { background:radial-gradient(ellipse at 50% 0%,#1a0828 0%,#050010 100%); z-index:100; padding:20px; }
+.create-box { background:rgba(255,255,255,0.04); border:1px solid rgba(240,192,64,0.25); border-radius:16px; padding:22px; width:100%; max-width:370px; }
+.create-box h2 { color:var(--gold); text-align:center; margin-bottom:18px; font-size:1.3em; }
+.field { margin-bottom:14px; }
+.field label { display:block; color:#ccb; font-size:0.82em; margin-bottom:5px; }
+.field input { width:100%; padding:10px 13px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:var(--text); font-family:Georgia,serif; font-size:0.95em; outline:none; }
+.field input:focus { border-color:var(--gold); }
+.houses-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.house-btn { padding:11px 6px; border-radius:10px; border:2px solid transparent; cursor:pointer; font-family:Georgia,serif; font-size:0.8em; text-align:center; display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.2s; }
+.house-btn[data-house=gryffindor]{background:rgba(139,0,0,0.25);color:#ffaaaa;}
+.house-btn[data-house=slytherin] {background:rgba(20,80,20,0.25); color:#aaffaa;}
+.house-btn[data-house=ravenclaw] {background:rgba(10,40,100,0.25);color:#aaccff;}
+.house-btn[data-house=hufflepuff]{background:rgba(100,80,0,0.25); color:#ffeeaa;}
+.house-btn.selected { border-color:var(--gold); transform:scale(1.04); }
+.house-icon { font-size:1.8em; }
+
+#screen-reward { background:radial-gradient(ellipse at 50%,#1a1000,#020008); z-index:100; }
+.reward-card { background:rgba(240,192,64,0.07); border:1px solid rgba(240,192,64,0.35); border-radius:16px; padding:26px 20px; width:100%; max-width:310px; text-align:center; }
+.reward-title { color:var(--gold); font-size:1.35em; margin-bottom:12px; }
+.reward-icon-big { font-size:3.5em; margin-bottom:10px; }
+.reward-items { display:flex; flex-direction:column; gap:7px; margin:14px 0; }
+.reward-item { display:flex; align-items:center; gap:9px; padding:7px 11px; border-radius:8px; background:rgba(255,255,255,0.04); font-size:0.88em; }
+.reward-val { color:var(--gold); margin-left:auto; }
+
+.btn-gold {
+  background:linear-gradient(135deg,#7a5a10,#c8a82a,#7a5a10);
+  border:none; color:#1a0800; padding:13px 28px; border-radius:10px;
+  font-family:Georgia,serif; font-size:0.95em; font-weight:bold; cursor:pointer;
+  box-shadow:0 4px 16px rgba(200,168,42,0.35); transition:all 0.2s; width:100%;
+}
+.btn-gold:active { transform:scale(0.97); }
+.btn-sec { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.18); color:var(--text); padding:11px 22px; border-radius:10px; font-family:Georgia,serif; font-size:0.88em; cursor:pointer; width:100%; transition:all 0.2s; }
+
+.toast { position:fixed; bottom:200px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.92); border:1px solid var(--gold); color:var(--text); padding:9px 18px; border-radius:18px; font-size:0.82em; z-index:999; pointer-events:none; animation:toastAnim 2.5s forwards; }
+@keyframes toastAnim { 0%{opacity:0;transform:translateX(-50%) translateY(8px)} 15%{opacity:1;transform:translateX(-50%) translateY(0)} 75%{opacity:1} 100%{opacity:0} }
+
+#turn-ind { position:fixed; top:70px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); border:1px solid rgba(240,192,64,0.4); color:var(--gold); font-size:0.78em; padding:5px 14px; border-radius:12px; z-index:30; display:none; }
+</style>
+</head>
+<body>
+
+<canvas id="canvas3d"></canvas>
+
+<div id="hud">
+  <div class="hud-left">
+    <span class="hud-name" id="hud-name">Mago</span>
+    <span class="hud-level" id="hud-level">Nv.1</span>
+  </div>
+  <div class="bars">
+    <div class="bar-row">
+      <span style="color:#f88">HP</span>
+      <div class="bar-track"><div class="bar-fill bar-hp" id="bar-hp" style="width:100%"></div></div>
+      <span id="txt-hp" style="font-size:0.65em;color:#f88">100</span>
+    </div>
+    <div class="bar-row">
+      <span style="color:#88f">MP</span>
+      <div class="bar-track"><div class="bar-fill bar-mp" id="bar-mp" style="width:100%"></div></div>
+      <span id="txt-mp" style="font-size:0.65em;color:#88f">50</span>
+    </div>
+  </div>
+  <button class="hud-map-btn" onclick="toggleMap()">Mapa</button>
+</div>
+
+<div id="turn-ind">Tu turno</div>
+
+<div id="bottom-panel">
+  <div class="panel-speaker" id="dlg-speaker"></div>
+  <div class="panel-text" id="dlg-text"></div>
+  <div class="panel-choices" id="dlg-choices"></div>
+</div>
+
+<div id="combat-panel">
+  <div class="combat-top">
+    <div class="enemy-row">
+      <span class="enemy-bar-name" id="enemy-name">Enemigo</span>
+      <div class="enemy-track"><div class="enemy-bar-fill" id="enemy-hp-fill" style="width:100%"></div></div>
+      <span id="enemy-hp-txt" style="font-size:0.65em;color:#f88;min-width:44px">100/100</span>
+    </div>
+    <div class="combat-log" id="combat-log"></div>
+  </div>
+  <div class="spells-grid" id="spells-grid"></div>
+</div>
+
+<div id="map-panel">
+  <div class="map-title">Elegir destino</div>
+  <div class="zones-grid" id="zones-grid"></div>
+</div>
+
+<div id="screen-intro" class="screen active">
+  <div id="stars-bg"></div>
+  <div class="intro-content">
+    <svg viewBox="0 0 160 180" width="130" style="margin-bottom:16px" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="cg"><stop offset="0%" stop-color="#f0c040" stop-opacity="0.3"/><stop offset="100%" stop-color="#f0c040" stop-opacity="0"/></radialGradient>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <ellipse cx="80" cy="90" rx="70" ry="80" fill="url(#cg)"/>
+      <path d="M80 12 L138 42 L138 108 Q138 148 80 158 Q22 148 22 108 L22 42 Z" fill="#0d0620" stroke="#f0c040" stroke-width="2.5" filter="url(#glow)"/>
+      <line x1="22" y1="82" x2="138" y2="82" stroke="#f0c040" stroke-width="1.2" opacity="0.5"/>
+      <line x1="80" y1="42" x2="80" y2="158" stroke="#f0c040" stroke-width="1.2" opacity="0.5"/>
+      <path d="M23 43 L79 43 L79 81 L23 81 Z" fill="#8b0000" opacity="0.5"/>
+      <path d="M81 43 L137 43 L137 81 L81 81 Z" fill="#1a4a1a" opacity="0.5"/>
+      <path d="M23 83 L79 83 L79 130 Q23 145 23 130 Z" fill="#0a2a5e" opacity="0.5"/>
+      <path d="M81 83 L137 83 L137 130 Q137 145 81 130 Z" fill="#7a6200" opacity="0.5"/>
+      <text x="51" y="70" text-anchor="middle" font-size="22">&#x1F981;</text>
+      <text x="109" y="70" text-anchor="middle" font-size="22">&#x1F40D;</text>
+      <text x="51" y="115" text-anchor="middle" font-size="22">&#x1F985;</text>
+      <text x="109" y="115" text-anchor="middle" font-size="22">&#x1F9A1;</text>
+      <path d="M80 12 L138 42 L138 108 Q138 148 80 158 Q22 148 22 108 L22 42 Z" fill="none" stroke="#f0c040" stroke-width="3" filter="url(#glow)"/>
+      <polygon points="60,14 65,6 70,14 75,4 80,12 85,4 90,14 95,6 100,14" fill="#f0c040" opacity="0.9"/>
+    </svg>
+    <div class="intro-title">Harry Potter</div>
+    <div class="intro-sub">La Aventura de Hogwarts</div>
+    <button class="btn-gold" onclick="mostrarCrear()" style="max-width:220px;margin:0 auto">Comenzar Aventura</button>
+    <br><br>
+    <button class="btn-sec" id="btn-continuar" onclick="continuarJuego()" style="max-width:220px;margin:0 auto;display:none">Continuar</button>
+  </div>
+</div>
+
+<div id="screen-create" class="screen">
+  <div class="create-box">
+    <h2>Tu Identidad Magica</h2>
+    <div class="field">
+      <label>Tu nombre</label>
+      <input id="input-name" type="text" placeholder="Escribe tu nombre..." maxlength="20">
+    </div>
+    <div class="field">
+      <label>Elige tu casa</label>
+      <div class="houses-grid">
+        <button class="house-btn" data-house="gryffindor" onclick="elegirCasa(this)"><span class="house-icon">&#x1F981;</span><span>Gryffindor</span><span style="font-size:0.7em;opacity:0.6">Valor</span></button>
+        <button class="house-btn" data-house="slytherin"  onclick="elegirCasa(this)"><span class="house-icon">&#x1F40D;</span><span>Slytherin</span><span style="font-size:0.7em;opacity:0.6">Astucia</span></button>
+        <button class="house-btn" data-house="ravenclaw"  onclick="elegirCasa(this)"><span class="house-icon">&#x1F985;</span><span>Ravenclaw</span><span style="font-size:0.7em;opacity:0.6">Sabiduria</span></button>
+        <button class="house-btn" data-house="hufflepuff" onclick="elegirCasa(this)"><span class="house-icon">&#x1F9A1;</span><span>Hufflepuff</span><span style="font-size:0.7em;opacity:0.6">Lealtad</span></button>
+      </div>
+    </div>
+    <button class="btn-gold" onclick="empezarJuego()">Ingresar a Hogwarts</button>
+  </div>
+</div>
+
+<div id="screen-reward" class="screen" style="z-index:100">
+  <div class="reward-card">
+    <div class="reward-icon-big" id="rew-icon">&#x1F3C6;</div>
+    <div class="reward-title">Mision Completada!</div>
+    <p style="color:#ccb;font-size:0.82em;margin-bottom:10px" id="rew-msg"></p>
+    <div class="reward-items" id="rew-items"></div>
+    <br>
+    <button class="btn-gold" onclick="despuesRecompensa()">Continuar</button>
+  </div>
+</div>
+
+<script src="three.min.js"></script>
+<script>
+var G = {
+  player: {
+    name:'', house:'', level:1, xp:0, xpNext:100,
+    hp:100, hpMax:100, mp:50, mpMax:50,
+    spells:['expelliarmus','lumos','wingardium'],
+    items:{ pocion:2 },
+    completed:[]
+  },
+  combat:{ active:false, enemy:null, enemyId:'' },
+  misionActual: '',
+  mode: 'intro'
+};
+
+var renderer, camera, clock;
+var scenes = {};
+var activeScene = null;
+
+function initRenderer() {
+  var canvas = document.getElementById('canvas3d');
+  renderer = new THREE.WebGLRenderer({ canvas:canvas, antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  clock = new THREE.Clock();
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 4, 12);
+  camera.lookAt(0, 1, 0);
+  window.addEventListener('resize', function() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  // WASD movement
+  var keys = {};
+  window.addEventListener('keydown', function(e){ keys[e.key.toLowerCase()] = true; });
+  window.addEventListener('keyup',   function(e){ keys[e.key.toLowerCase()] = false; });
+
+  function moverJugador(dt) {
+    if (!activeScene || !activeScene.objs || !activeScene.objs.player) return;
+    var p = activeScene.objs.player;
+    var speed = 4 * dt;
+    var moved = false;
+    if (keys['w'] || keys['arrowup'])    { p.position.z -= speed; moved = true; }
+    if (keys['s'] || keys['arrowdown'])  { p.position.z += speed; moved = true; }
+    if (keys['a'] || keys['arrowleft'])  { p.position.x -= speed; moved = true; }
+    if (keys['d'] || keys['arrowright']) { p.position.x += speed; moved = true; }
+    if (moved) {
+      // Rotar personaje hacia la direccion que camina
+      var vx = (keys['d']?1:0)-(keys['a']?1:0);
+      var vz = (keys['s']?1:0)-(keys['w']?1:0);
+      if (vx !== 0 || vz !== 0) p.rotation.y = Math.atan2(vx, vz);
+      // Camara sigue al jugador
+      var camOffset = new THREE.Vector3(0, 5, 10);
+      camera.position.x += (p.position.x + camOffset.x - camera.position.x) * 0.08;
+      camera.position.z += (p.position.z + camOffset.z - camera.position.z) * 0.08;
+      camera.lookAt(p.position.x, p.position.y + 1.5, p.position.z);
+    }
+  }
+
+  function loop() {
+    requestAnimationFrame(loop);
+    var dt = clock.getDelta();
+    moverJugador(dt);
+    if (activeScene && activeScene.update) activeScene.update(dt);
+    if (activeScene) renderer.render(activeScene.scene, camera);
+  }
+  loop();
+}
+
+function mat(color, emissive, rough, metal) {
+  return new THREE.MeshStandardMaterial({ color:color, emissive:emissive||0x000000, roughness:rough!==undefined?rough:0.92, metalness:metal!==undefined?metal:0.0 });
+}
+function matPiel()   { return mat(0xd4a87a, 0x0a0500, 0.88, 0.0); }
+function matTela(c)  { return mat(c, 0x000000, 0.95, 0.0); }
+function matPiedra() { return mat(0x2e2840, 0x030208, 0.97, 0.0); }
+function matMadera() { return mat(0x4a2e10, 0x000000, 0.94, 0.0); }
+function matMetal()  { return mat(0x888888, 0x111111, 0.55, 0.7); }
+function matOro()    { return mat(0xf0c040, 0x302000, 0.3,  0.9); }
+function luz(s, color, intens, x, y, z, shadow) {
+  var l = new THREE.PointLight(color, intens, 50);
+  l.position.set(x,y,z);
+  if (shadow) { l.castShadow=true; }
+  s.add(l); return l;
+}
+function caja(w,h,d,m,x,y,z,s) {
+  var mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), m);
+  mesh.position.set(x,y,z); mesh.castShadow=true; mesh.receiveShadow=true; s.add(mesh); return mesh;
+}
+function esfera(r,m,x,y,z,s,seg) {
+  var mesh = new THREE.Mesh(new THREE.SphereGeometry(r,seg||12,seg||12), m);
+  mesh.position.set(x,y,z); s.add(mesh); return mesh;
+}
+function cilindro(rt,rb,h,m,x,y,z,s,seg) {
+  var mesh = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg||8), m);
+  mesh.position.set(x,y,z); mesh.castShadow=true; s.add(mesh); return mesh;
+}
+function cono(r,h,m,x,y,z,s,seg) {
+  var mesh = new THREE.Mesh(new THREE.ConeGeometry(r,h,seg||7), m);
+  mesh.position.set(x,y,z); mesh.castShadow=true; s.add(mesh); return mesh;
+}
+function particulas(s, n, color, spread, yBase) {
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(n*3);
+  for (var i=0;i<n;i++) {
+    pos[i*3]=(Math.random()-0.5)*spread;
+    pos[i*3+1]=yBase+Math.random()*6;
+    pos[i*3+2]=(Math.random()-0.5)*spread;
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  var pts = new THREE.Points(geo, new THREE.PointsMaterial({color:color,size:0.08,transparent:true,opacity:0.85}));
+  s.add(pts); return pts;
+}
+
+function mago(s, x, y, z, robeColor, hatColor, scale) {
+  robeColor = robeColor || 0x8b0000;
+  hatColor = hatColor || 0x0a0a0a;
+  scale = scale || 1;
+  var g = new THREE.Group();
+  var robeMat = matTela(robeColor);
+  var hatMat  = matTela(hatColor);
+  var skinMat = matPiel();
+  var wandMat = matMadera();
+  // Cuerpo / robe con pliegues simulados (más ancho abajo)
+  var body = new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.58,1.45,10), robeMat);
+  body.position.y=0.72; body.castShadow=true; g.add(body);
+  // Hombros
+  [-1,1].forEach(function(side) {
+    var shoulder = new THREE.Mesh(new THREE.SphereGeometry(0.18,8,6), robeMat);
+    shoulder.position.set(side*0.44,1.3,0); g.add(shoulder);
+    var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.13,0.95,7), robeMat);
+    arm.position.set(side*0.54,0.9,0); arm.rotation.z=side*0.48; arm.castShadow=true; g.add(arm);
+    // Mano
+    esfera(0.1, skinMat, side*0.92,0.54,0, g, 7);
+  });
+  // Varita
+  var wand = new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.025,0.72,6), wandMat);
+  wand.position.set(0.94,0.52,0); wand.rotation.z=-0.72; g.add(wand);
+  // Cuello
+  cilindro(0.16,0.16,0.2, skinMat, 0,1.54,0, g, 8);
+  // Cabeza
+  var head = new THREE.Mesh(new THREE.SphereGeometry(0.3,12,10), skinMat);
+  head.scale.set(1,1.08,0.95); head.position.set(0,1.94,0); g.add(head);
+  // Nariz
+  esfera(0.06, skinMat, 0,1.9,0.28, g, 5);
+  // Ojos
+  esfera(0.055, mat(0x1a1a2e,0x000000,0.4), -0.1,2.0,0.25, g, 6);
+  esfera(0.055, mat(0x1a1a2e,0x000000,0.4),  0.1,2.0,0.25, g, 6);
+  esfera(0.025, mat(0xffffff,0,0.3),          -0.1,2.02,0.28, g, 5);
+  esfera(0.025, mat(0xffffff,0,0.3),           0.1,2.02,0.28, g, 5);
+  // Sombrero (ala + cono)
+  cilindro(0.04,0.36,0.1, hatMat, 0,2.3,0, g, 10);
+  cono(0.22,0.72, hatMat, 0,2.72,0, g, 9);
+  g.position.set(x,y,z); g.scale.setScalar(scale);
+  s.add(g); return g;
+}
+
+function makeTroll(s, x, y, z) {
+  var g = new THREE.Group();
+  var gm   = mat(0x4a7a2a, 0x0a1a00, 0.98, 0.0);
+  var gm2  = mat(0x3a6a1a, 0x060e00, 0.98, 0.0);
+  var eyeM = mat(0xcc0000, 0x440000, 0.5,  0.05);
+  var toothM = mat(0xe8e0c0, 0x050400, 0.85, 0.0);
+  caja(1.6,2.2,1.0, gm, 0,1.1,0, g);
+  [-1,1].forEach(function(side) {
+    var arm = new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.3,1.6,8), gm);
+    arm.position.set(side*1.05,1.5,0); arm.rotation.z=side*0.55; arm.castShadow=true; g.add(arm);
+    esfera(0.3, gm, side*1.75,0.85,0, g, 8);
+  });
+  esfera(0.7,  gm,   0,2.8,0,    g, 12);
+  esfera(0.22, gm2, -0.7,2.8,0,  g, 6);
+  esfera(0.22, gm2,  0.7,2.8,0,  g, 6);
+  esfera(0.12, eyeM,-0.22,2.92,0.58, g, 6);
+  esfera(0.12, eyeM, 0.22,2.92,0.58, g, 6);
+  esfera(0.18, gm2, 0,2.7,0.6,   g, 6);
+  cono(0.06,0.28, toothM, -0.15,2.35,0.55, g, 4);
+  cono(0.06,0.28, toothM,  0.15,2.35,0.55, g, 4);
+  var handle = new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2,8), matMadera());
+  handle.position.set(1.8,1.5,0.3); handle.rotation.z=-0.4; g.add(handle);
+  esfera(0.36, matPiedra(), 2.3,2.4,0.1, g, 8);
+  g.position.set(x,y,z); s.add(g); return g;
+}
+
+function makeCentaur(s, x, y, z) {
+  var g = new THREE.Group();
+  var bm = mat(0x7a5018, 0x100800, 0.97, 0.0);
+  var sm = matPiel();
+  caja(1.6,1.2,2.8, bm, 0,1.2,0, g);
+  [[-0.5,0,-0.8],[0.5,0,-0.8],[-0.5,0,0.8],[0.5,0,0.8]].forEach(function(p) {
+    cilindro(0.14,0.14,1.2, bm, p[0],0.6,p[2], g, 6);
+  });
+  var torso = new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.5,1.3,8), sm);
+  torso.position.set(0,2.5,-0.4); torso.rotation.x=-0.3; g.add(torso);
+  [-1,1].forEach(function(side) {
+    esfera(0.18, sm, side*0.44,3.1,-0.4, g, 7);
+    var arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.12,0.8,7), sm);
+    arm2.position.set(side*0.52,2.75,-0.35); arm2.rotation.z=side*0.6; g.add(arm2);
+  });
+  esfera(0.35, sm, 0,3.5,-0.55, g, 10);
+  esfera(0.07, mat(0x1a1a1a,0,0.4), -0.12,3.6,-0.3, g, 6);
+  esfera(0.07, mat(0x1a1a1a,0,0.4),  0.12,3.6,-0.3, g, 6);
+  var curve = new THREE.QuadraticBezierCurve3(
+    new THREE.Vector3(0.9,2.5,-0.2), new THREE.Vector3(1.2,3.2,-0.5), new THREE.Vector3(0.9,3.9,-0.8)
+  );
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(curve,14,0.04,6,false), matMadera()));
+  g.position.set(x,y,z); s.add(g); return g;
+}
+
+function buildMapScene() {
+  var s = { scene:new THREE.Scene(), objs:{}, t:0 };
+  s.scene.fog = new THREE.FogExp2(0x050010, 0.04);
+  s.scene.background = new THREE.Color(0x040010);
+  particulas(s.scene, 300, 0xffffff, 80, -5);
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0x1a1428,roughness:0.9}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; s.scene.add(floor);
+  var stoneMat = matPiedra();
+  caja(8,6,4,stoneMat,0,3,-10,s.scene);
+  caja(4,8,4,stoneMat,-6,4,-10,s.scene);
+  caja(4,8,4,stoneMat, 6,4,-10,s.scene);
+  [[-6,8,-10,0.6,3],[6,8,-10,0.6,3],[0,6,-10,0.5,2.5],[-9,5,-9,0.5,2.2],[9,5,-9,0.5,2.2]].forEach(function(d) {
+    cono(d[3],d[4],mat(0x1e1535),d[0],d[1]+d[4]/2,d[2],s.scene,6);
+  });
+  var winMat = new THREE.MeshStandardMaterial({color:0xffdd88,emissive:0xffcc44,emissiveIntensity:2});
+  [[-2,4,-7.9],[0,4,-7.9],[2,4,-7.9],[-2,6,-7.9],[2,6,-7.9],[-7.9,5,-10],[-7.9,7,-10],[7.9,5,-10],[7.9,7,-10]].forEach(function(d) {
+    var w = new THREE.Mesh(new THREE.PlaneGeometry(0.4,0.6), winMat);
+    w.position.set(d[0],d[1],d[2]); w.rotation.y=Math.abs(d[2]+7.9)<0.1?0:Math.PI/2; s.scene.add(w);
+  });
+  luz(s.scene,0xffcc44,3,0,8,-5,true); luz(s.scene,0x4444ff,1,-6,6,-6); luz(s.scene,0xff4400,1,6,6,-6);
+  esfera(1.5, new THREE.MeshStandardMaterial({color:0xfffde0,emissive:0xfffde0,emissiveIntensity:0.8}), 12,15,-20, s.scene, 16);
+  luz(s.scene,0xaaaaff,0.8,12,15,-15);
+  var water = new THREE.Mesh(new THREE.PlaneGeometry(18,12), new THREE.MeshStandardMaterial({color:0x0d1a3a,roughness:0.1,metalness:0.8,transparent:true,opacity:0.85}));
+  water.rotation.x=-Math.PI/2; water.position.set(-14,0.05,-2); s.scene.add(water); s.objs.water=water;
+  [[-12,0.3,0],[-14,0.3,-3],[-16,0.3,-1]].forEach(function(d) { caja(1.2,0.3,0.5,mat(0x3a2a10),d[0],d[1],d[2],s.scene); luz(s.scene,0xff8800,0.4,d[0],d[1]+0.5,d[2]); });
+  for(var i=0;i<12;i++){var tx=10+Math.random()*8,tz=-5+(Math.random()-0.5)*16,th=3+Math.random()*3;caja(0,0,0,mat(0x000000),0,0,0,s.scene);cono(0.8+Math.random()*0.5,th,mat(0x051005),tx,th/2,tz,s.scene,6);cilindro(0.18,0.18,1,mat(0x1a0800),tx,0.5,tz,s.scene,6);}
+  var pm=mat(0x888888);
+  [-1,0,1].forEach(function(ox){cilindro(0.06,0.06,4,pm,18+ox*0.8,2,2,s.scene,6);var ring=new THREE.Mesh(new THREE.TorusGeometry(0.35,0.05,8,16),pm);ring.position.set(18+ox*0.8,4.3,2);ring.rotation.x=Math.PI/2;s.scene.add(ring);});
+  var snitch = esfera(0.1,new THREE.MeshStandardMaterial({color:0xf0c040,emissive:0xc8a020,emissiveIntensity:1}),18,3.5,2,s.scene,8); s.objs.snitch=snitch;
+  s.objs.player = mago(s.scene,0,0,3,0x8b0000,0x0a0a0a,1);
+  var tg=new THREE.BufferGeometry(); var tp=new Float32Array(40*3);
+  for(var i=0;i<40;i++){tp[i*3]=-4.5+(Math.random()-0.5)*0.2;tp[i*3+1]=1.5+Math.random()*0.8;tp[i*3+2]=-7+(Math.random()-0.5)*0.2;}
+  tg.setAttribute('position',new THREE.BufferAttribute(tp,3));
+  var torch=new THREE.Points(tg,new THREE.PointsMaterial({color:0xff8800,size:0.12,transparent:true,opacity:0.9}));
+  s.scene.add(torch); s.objs.torch=torch; luz(s.scene,0xff6600,1.5,-4.5,2,-7,true);
+  var dl0=new THREE.DirectionalLight(0xfff8e0,0.9);dl0.position.set(5,12,8);dl0.castShadow=true;s.scene.add(dl0);
+  s.scene.add(new THREE.AmbientLight(0x1a1030,0.4));
+  camera.position.set(0,8,18); camera.lookAt(0,1,-5);
+  s.update = function(dt) {
+    s.t+=dt;
+    if(s.objs.water)s.objs.water.position.y=0.05+Math.sin(s.t*0.8)*0.03;
+    if(s.objs.snitch){s.objs.snitch.position.x=18+Math.sin(s.t*1.2)*1.5;s.objs.snitch.position.y=3.5+Math.sin(s.t*2.1)*0.5;}
+    if(s.objs.torch){var p=s.objs.torch.geometry.attributes.position.array;for(var i=0;i<40;i++){p[i*3+1]+=0.03;if(p[i*3+1]>2.5)p[i*3+1]=1.5;}s.objs.torch.geometry.attributes.position.needsUpdate=true;}
+    if(s.objs.player)s.objs.player.rotation.y=Math.sin(s.t*0.5)*0.12;
+  };
+  return s;
+}
+
+function buildHallScene() {
+  var s={scene:new THREE.Scene(),objs:{},t:0};
+  s.scene.fog=new THREE.Fog(0x0a0518,8,30); s.scene.background=new THREE.Color(0x080415);
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0x1a1428,roughness:0.9}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; s.scene.add(floor);
+  caja(0.5,8,16,mat(0x1e1830),-6,4,0,s.scene); caja(0.5,8,16,mat(0x1e1830),6,4,0,s.scene);
+  caja(13,0.5,16,mat(0x100d20),0,7.8,0,s.scene);
+  [-4,-1,2].forEach(function(z){cilindro(0.3,0.3,8,mat(0x1a1438),-5.5,4,z,s.scene,8);cilindro(0.3,0.3,8,mat(0x1a1438),5.5,4,z,s.scene,8);});
+  [[-5,3.5,-3],[5,3.5,-3],[-5,3.5,2],[5,3.5,2]].forEach(function(d){cilindro(0.1,0.1,0.4,mat(0x3a2000),d[0],d[1],d[2],s.scene,6);luz(s.scene,0xff6600,1.8,d[0],d[1]+0.3,d[2]);});
+  [0x8b0000,0x1a4a1a,0x0a2a5e,0x7a6200].forEach(function(c,i){var b=new THREE.Mesh(new THREE.PlaneGeometry(0.6,1.2),new THREE.MeshStandardMaterial({color:c,side:THREE.DoubleSide}));b.position.set(-5.3,5.5,-4+i*2.5);s.scene.add(b);});
+  s.objs.enemy = makeTroll(s.scene,3,0,-3);
+  s.objs.player = mago(s.scene,-3,0,1,0x8b0000,0x0a0a0a,0.9);
+  s.objs.magic = particulas(s.scene,60,0x8888ff,12,0.5);
+  luz(s.scene,0x4444aa,1.5,0,5,0,true);
+  var dl1=new THREE.DirectionalLight(0xffe8c0,1.0);dl1.position.set(4,10,7);dl1.castShadow=true;s.scene.add(dl1);
+  s.scene.add(new THREE.AmbientLight(0x1a1030,0.5));
+  camera.position.set(0,3.5,9); camera.lookAt(0,1.5,-1);
+  s.update=function(dt){
+    s.t+=dt;
+    if(s.objs.enemy)s.objs.enemy.position.y=Math.sin(s.t*0.8)*0.06;
+    if(s.objs.player)s.objs.player.rotation.y=Math.sin(s.t*1.5)*0.1;
+    if(s.objs.magic){var p=s.objs.magic.geometry.attributes.position.array;for(var i=0;i<60;i++){p[i*3+1]+=0.02;if(p[i*3+1]>8)p[i*3+1]=0.5;}s.objs.magic.geometry.attributes.position.needsUpdate=true;}
+  };
+  return s;
+}
+
+function buildAlleyScene() {
+  var s={scene:new THREE.Scene(),objs:{},t:0};
+  s.scene.fog=new THREE.Fog(0x050210,6,22); s.scene.background=new THREE.Color(0x04020d);
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0x0d0c18,roughness:1}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; s.scene.add(floor);
+  var brick=mat(0x1a1020);
+  caja(6,7,2,brick,-5,3.5,-5,s.scene); caja(6,9,2,brick,3,4.5,-5,s.scene); caja(4,5,2,brick,8,2.5,-4,s.scene);
+  [[-3.5,5,-4],[-1.5,5,-4],[3,6,-4],[5,6,-4]].forEach(function(d){
+    var w=new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.9),new THREE.MeshStandardMaterial({color:0xffdd88,emissive:0xffcc44,emissiveIntensity:2}));
+    w.position.set(d[0],d[1],d[2]);s.scene.add(w);luz(s.scene,0xffcc44,0.6,d[0],d[1],d[2]+0.5);
+  });
+  var sign=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.5,0.1),mat(0x3a2000));sign.position.set(3,7.5,-3.9);s.scene.add(sign);
+  cilindro(0.4,0.4,0.7,mat(0x3a2000),-5,0.35,0,s.scene,8);
+  caja(0.8,0.7,0.7,mat(0x2a1800),-3.5,0.35,0.2,s.scene);
+  s.objs.enemy = mago(s.scene,3,0,-1,0x0d0d30,0x0a0020,1);
+  var cape=new THREE.Mesh(new THREE.ConeGeometry(0.6,1.8,8),new THREE.MeshStandardMaterial({color:0x050510,side:THREE.DoubleSide}));
+  cape.position.set(3,0.9,-1);s.scene.add(cape);
+  s.objs.player = mago(s.scene,-2.5,0,1,0x8b0000,0x0a0a0a,0.9);
+  var pg=new THREE.BufferGeometry(); var pp=new Float32Array(30*3);
+  for(var i=0;i<30;i++){pp[i*3]=3+(Math.random()-0.5)*1.5;pp[i*3+1]=1.5+Math.random()*2;pp[i*3+2]=-1+(Math.random()-0.5);}
+  pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  var pts=new THREE.Points(pg,new THREE.PointsMaterial({color:0xaa00ff,size:0.1,transparent:true,opacity:0.9}));
+  s.scene.add(pts);s.objs.magic=pts;
+  luz(s.scene,0x8800ff,1.5,3,2,-1); luz(s.scene,0x334488,1,-5,4,-3,true);
+  var dl2=new THREE.DirectionalLight(0xffeedd,0.8);dl2.position.set(3,9,6);dl2.castShadow=true;s.scene.add(dl2);
+  s.scene.add(new THREE.AmbientLight(0x10081a,0.5));
+  camera.position.set(0,3,8);camera.lookAt(0,1.5,-1);
+  s.update=function(dt){
+    s.t+=dt;
+    if(s.objs.enemy)s.objs.enemy.rotation.y=Math.sin(s.t*1.2)*0.15;
+    if(s.objs.magic){var p=s.objs.magic.geometry.attributes.position.array;for(var i=0;i<30;i++){p[i*3+1]+=0.03;if(p[i*3+1]>4)p[i*3+1]=1;}s.objs.magic.geometry.attributes.position.needsUpdate=true;}
+  };
+  return s;
+}
+
+function buildForestScene() {
+  var s={scene:new THREE.Scene(),objs:{},t:0};
+  s.scene.fog=new THREE.FogExp2(0x010c01,0.065); s.scene.background=new THREE.Color(0x010c01);
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.MeshStandardMaterial({color:0x050f05,roughness:1}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;s.scene.add(floor);
+  var tm=mat(0x061206),trm=mat(0x100800);
+  [[-4,0,-4],[-2,0,-6],[1,0,-5],[3,0,-4],[5,0,-6],[-6,0,-2],[6,0,-2],[-3,0,2],[4,0,3],[-5,0,1],[5,0,0]].forEach(function(d){
+    var h=3+Math.random()*4;
+    cono(0.7+Math.random()*0.5,h,tm,d[0],h/2,d[2],s.scene,7);
+    cilindro(0.18,0.22,1.2,trm,d[0],0.6,d[2],s.scene,6);
+  });
+  esfera(0.8,new THREE.MeshStandardMaterial({color:0xfffde0,emissive:0xfffde0,emissiveIntensity:0.6}),2,10,-8,s.scene,12);
+  luz(s.scene,0xaaaaee,0.8,2,10,-6);
+  s.objs.enemy = makeCentaur(s.scene,3.5,0,-2);
+  s.objs.hagrid = mago(s.scene,-3.5,0,2,0x5a3010,0x1a0800,1.3);
+  s.objs.player = mago(s.scene,-2,0,1,0x8b0000,0x0a0a0a,0.9);
+  var gg=new THREE.BufferGeometry(); var gp=new Float32Array(50*3);
+  for(var i=0;i<50;i++){gp[i*3]=(Math.random()-0.5)*12;gp[i*3+1]=0.5+Math.random()*3;gp[i*3+2]=(Math.random()-0.5)*8-3;}
+  gg.setAttribute('position',new THREE.BufferAttribute(gp,3));
+  var wisps=new THREE.Points(gg,new THREE.PointsMaterial({color:0x00ff88,size:0.1,transparent:true,opacity:0.8}));
+  s.scene.add(wisps);s.objs.magic=wisps;
+  luz(s.scene,0x00ff44,0.8,0,3,0);
+  var dl3=new THREE.DirectionalLight(0xe8f0e0,0.7);dl3.position.set(4,10,5);dl3.castShadow=true;s.scene.add(dl3);
+  s.scene.add(new THREE.AmbientLight(0x051005,0.4));
+  camera.position.set(0,4,9);camera.lookAt(0,2,-1);
+  s.update=function(dt){
+    s.t+=dt;
+    if(s.objs.enemy)s.objs.enemy.rotation.y=Math.sin(s.t*0.8)*0.2;
+    if(s.objs.magic){var p=s.objs.magic.geometry.attributes.position.array;for(var i=0;i<50;i++){p[i*3]+=Math.sin(s.t*2+i)*0.01;p[i*3+1]+=0.015;if(p[i*3+1]>4)p[i*3+1]=0.5;}s.objs.magic.geometry.attributes.position.needsUpdate=true;}
+  };
+  return s;
+}
+
+function buildQuidditchScene() {
+  var s={scene:new THREE.Scene(),objs:{},t:0};
+  s.scene.fog=new THREE.Fog(0x04061a,15,40); s.scene.background=new THREE.Color(0x04061a);
+  var floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0x0a1a0a,roughness:0.95}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;s.scene.add(floor);
+  var pm=mat(0xaaaaaa,0x222222);
+  [-2,0,2].forEach(function(ox){
+    cilindro(0.1,0.1,6,pm,12+ox,3,-4,s.scene,8);
+    var r=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.07,8,16),pm);r.position.set(12+ox,6.4,-4);r.rotation.x=Math.PI/2;s.scene.add(r);
+    cilindro(0.1,0.1,6,pm,-12+ox,3,-4,s.scene,8);
+    var r2=r.clone();r2.position.set(-12+ox,6.4,-4);s.scene.add(r2);
+  });
+  luz(s.scene,0xffffff,1,12,8,-4,true); luz(s.scene,0xffffff,1,-12,8,-4);
+  s.objs.enemy = mago(s.scene,3,3,-2,0x1a1a60,0x0a0a30,1);
+  var br=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,2,6),mat(0x5a3010));br.position.set(3,2.5,-2);br.rotation.z=Math.PI/2;s.scene.add(br);
+  s.objs.player = mago(s.scene,-3,3,1,0x8b0000,0x0a0a0a,0.9);
+  var bp=br.clone();bp.position.set(-3,2.5,1);s.scene.add(bp);
+  var snitch=esfera(0.12,new THREE.MeshStandardMaterial({color:0xf0c040,emissive:0xc8a020,emissiveIntensity:2}),0,4,0,s.scene,8);
+  s.objs.snitch=snitch; luz(s.scene,0xf0c040,1.5,0,4,0);
+  caja(8,1.5,2,mat(0x1a1a3a),-8,0.75,-6,s.scene); caja(8,1.5,2,mat(0x1a1a3a),8,0.75,-6,s.scene);
+  [[-5,7,-8],[3,8,-10],[-8,6,-6],[8,7,-9]].forEach(function(d){var c=new THREE.Mesh(new THREE.SphereGeometry(1.5,8,6),new THREE.MeshStandardMaterial({color:0x8888aa,transparent:true,opacity:0.22}));c.position.set(d[0],d[1],d[2]);s.scene.add(c);});
+  var dl4=new THREE.DirectionalLight(0xd0e0ff,1.1);dl4.position.set(6,15,8);dl4.castShadow=true;s.scene.add(dl4);
+  s.scene.add(new THREE.AmbientLight(0x111130,0.5));
+  camera.position.set(0,5,11);camera.lookAt(0,3,-1);
+  s.update=function(dt){
+    s.t+=dt;
+    if(s.objs.snitch){s.objs.snitch.position.x=Math.sin(s.t*1.8)*3;s.objs.snitch.position.y=4+Math.sin(s.t*2.6)*0.8;s.objs.snitch.position.z=Math.cos(s.t*1.4)*2;}
+    if(s.objs.enemy){s.objs.enemy.position.y=3+Math.sin(s.t*1.2)*0.4;s.objs.enemy.rotation.y=Math.sin(s.t)*0.2;}
+    if(s.objs.player)s.objs.player.position.y=3+Math.sin(s.t*1.5+1)*0.35;
+  };
+  return s;
+}
+
+function setScene(name) {
+  if(!scenes[name]) {
+    if(name==='map')    scenes[name]=buildMapScene();
+    else if(name==='hall')  scenes[name]=buildHallScene();
+    else if(name==='alley') scenes[name]=buildAlleyScene();
+    else if(name==='forest')scenes[name]=buildForestScene();
+    else if(name==='quid')  scenes[name]=buildQuidditchScene();
+  }
+  activeScene=scenes[name];
+}
+
+// =================== DATOS DEL JUEGO ===================
+var HECHIZOS = {
+  expelliarmus: { name:'Expelliarmus', icon:'&#x26A1;', cost:8,  dmg:[15,25] },
+  lumos:        { name:'Lumos',        icon:'&#x1F4A1;',cost:4,  dmg:[8,14]  },
+  wingardium:   { name:'Wingardium',   icon:'&#x1F32A;',cost:10, dmg:[20,30] },
+  stupefy:      { name:'Stupefy',      icon:'&#x1F534;',cost:12, dmg:[25,40] },
+  patronus:     { name:'Patronus',     icon:'&#x1F98C;',cost:20, dmg:[50,70] }
+};
+
+var ENEMIGOS = {
+  troll:         { name:'Troll de Montana',  hp:80,  hpMax:80,  dmgMin:12,dmgMax:22, escena:'hall'   },
+  auror_corrupto:{ name:'Auror Corrupto',    hp:60,  hpMax:60,  dmgMin:10,dmgMax:20, escena:'alley'  },
+  centauro:      { name:'Centauro Furioso',  hp:100, hpMax:100, dmgMin:18,dmgMax:30, escena:'forest' },
+  jugador_rival: { name:'Jugador Rival',     hp:90,  hpMax:90,  dmgMin:15,dmgMax:25, escena:'quid'   }
+};
+
+var MISIONES = {
+  hogwarts: {
+    titulo:'El Misterio del Pasillo', escena:'hall', requiere:null,
+    nodos:{
+      start:{ personaje:'Dumbledore', texto:'Bienvenido a Hogwarts. Esta noche escuche pasos en el Pasillo del tercer piso. Es peligroso.', opciones:[{texto:'Investigar el pasillo',siguiente:'investigar'},{texto:'Ignorarlo y dormir',siguiente:'dormir'}]},
+      investigar:{ personaje:'Narrador', texto:'Avanzas por el oscuro corredor. Una puerta entreabierta deja escapar una luz violacea y un gruñido enorme.', opciones:[{texto:'Luchar!',siguiente:'_combate_troll'}]},
+      dormir:{ personaje:'Hermione', texto:'Al dia siguiente te enteraste: habia un troll. Perdiste la oportunidad.', opciones:[{texto:'Volver al mapa',siguiente:'_mapa'}]},
+      win_troll:{ personaje:'Hermione', texto:'Increible! Venciste al troll. Detras hay una trampilla hacia algo importante.', opciones:[{texto:'Tomar recompensa',siguiente:'_recompensa',reward:{xp:80,items:{pocion:1},msg:'Derrotaste al Troll del pasillo!',icon:'&#x1F3C6;'}}]},
+      lose_troll:{ personaje:'Madame Pomfrey', texto:'Despiertas en la enfermeria. El troll te golpeo fuerte pero sigues vivo. Intentalo de nuevo.', opciones:[{texto:'Volver al mapa',siguiente:'_mapa'}]}
+    }
+  },
+  hogsmeade: {
+    titulo:'Problema en Hogsmeade', escena:'alley', requiere:'hogwarts',
+    nodos:{
+      start:{ personaje:'Olivander', texto:'Un ladron robo pociones de mi tienda. Vi que se metio en el callejon trasero. Puedes recuperarlas?', opciones:[{texto:'Buscar al ladron',siguiente:'callejon'}]},
+      callejon:{ personaje:'Narrador', texto:'En el callejon encuentras al ladron: un Auror corrupto con capa negra. Saca su varita.', opciones:[{texto:'Detente!',siguiente:'_combate_auror_corrupto'}]},
+      win_auror_corrupto:{ personaje:'Olivander', texto:'Extraordinario! Recuperaste las pociones. Mereces una recompensa.', opciones:[{texto:'Gracias',siguiente:'_recompensa',reward:{xp:120,items:{pocion:3},msg:'Atrapaste al ladron de Hogsmeade!',icon:'&#x2697;'}}]},
+      lose_auror_corrupto:{ personaje:'Narrador', texto:'El Auror era muy poderoso. Regresa cuando estes mas fuerte.', opciones:[{texto:'Volver al mapa',siguiente:'_mapa'}]}
+    }
+  },
+  bosque: {
+    titulo:'El Bosque Prohibido', escena:'forest', requiere:'hogsmeade',
+    nodos:{
+      start:{ personaje:'Hagrid', texto:'Hay un Hipogrifo atrapado en el bosque y un Centauro furioso que no lo deja pasar. Me acompanas?', opciones:[{texto:'Entrar al bosque',siguiente:'profundo'}]},
+      profundo:{ personaje:'Centauro', texto:'Los cielos me muestran tu presencia, mago. Solo un verdadero guardian puede pasar por este bosque.', opciones:[{texto:'Demostrare mi valia!',siguiente:'_combate_centauro'}]},
+      win_centauro:{ personaje:'Centauro', texto:'Eres digno. Los astros sonrien. El Hipogrifo es libre.', opciones:[{texto:'Hipogrifo libre!',siguiente:'_recompensa',reward:{xp:200,items:{pocion:2},msg:'Liberaste al Hipogrifo del Bosque!',icon:'&#x1F985;',hechizo:'stupefy'}}]},
+      lose_centauro:{ personaje:'Hagrid', texto:'El Centauro era muy poderoso. Volvamos cuando estes mas preparado.', opciones:[{texto:'Volver al mapa',siguiente:'_mapa'}]}
+    }
+  },
+  quidditch: {
+    titulo:'La Copa de Quidditch', escena:'quid', requiere:'bosque',
+    nodos:{
+      start:{ personaje:'Madam Hooch', texto:'El equipo rival lanzo un hechizo sobre nuestras escobas. Debes enfrentar a su jugador estrella.', opciones:[{texto:'Al campo!',siguiente:'campo'}]},
+      campo:{ personaje:'Narrador', texto:'A 50 metros de altura, el jugador rival te bloquea el paso en su escoba encantada.', opciones:[{texto:'Enfrentarlo!',siguiente:'_combate_jugador_rival'}]},
+      win_jugador_rival:{ personaje:'Madam Hooch', texto:'Gryffindor gana la Copa! Eres el heroe de Hogwarts.', opciones:[{texto:'Por Hogwarts!',siguiente:'_recompensa',reward:{xp:300,items:{pocion:3},msg:'Salvaste la Copa de Quidditch!',icon:'&#x1F3C6;',hechizo:'patronus'}}]},
+      lose_jugador_rival:{ personaje:'Narrador', texto:'El rival era muy fuerte. El partido esta en peligro. Intentalo de nuevo.', opciones:[{texto:'Volver al mapa',siguiente:'_mapa'}]}
+    }
+  }
+};
+
+var ZONAS = {
+  hogwarts: { icon:'&#x1F3F0;', nombre:'Gran Salon' },
+  hogsmeade:{ icon:'&#x1F3EA;', nombre:'Hogsmeade'  },
+  bosque:   { icon:'&#x1F332;', nombre:'Bosque'      },
+  quidditch:{ icon:'&#x1FA79;', nombre:'Quidditch'   }
+};
+
+// =================== UTILIDADES ===================
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+function toast(msg) {
+  var el=document.createElement('div');el.className='toast';el.innerHTML=msg;
+  document.body.appendChild(el);setTimeout(function(){el.remove();},2600);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById('screen-'+id);if(el)el.classList.add('active');
+}
+function hideScreen(id){var el=document.getElementById('screen-'+id);if(el)el.classList.remove('active');}
+function cerrarPaneles(){['bottom-panel','combat-panel','map-panel'].forEach(function(id){document.getElementById(id).classList.remove('open');});}
+
+function actualizarHUD(){
+  var p=G.player;
+  document.getElementById('hud-name').textContent=p.name+' ('+p.house+')';
+  document.getElementById('hud-level').textContent='Nv.'+p.level+' '+p.xp+'/'+p.xpNext+' XP';
+  document.getElementById('bar-hp').style.width=Math.max(0,p.hp/p.hpMax*100)+'%';
+  document.getElementById('bar-mp').style.width=Math.max(0,p.mp/p.mpMax*100)+'%';
+  document.getElementById('txt-hp').textContent=p.hp;
+  document.getElementById('txt-mp').textContent=p.mp;
+}
+
+function ganarXP(xp){
+  G.player.xp+=xp;
+  while(G.player.xp>=G.player.xpNext){
+    G.player.xp-=G.player.xpNext;G.player.level++;G.player.xpNext=Math.floor(G.player.xpNext*1.5);
+    G.player.hpMax+=20;G.player.hp=G.player.hpMax;G.player.mpMax+=10;G.player.mp=G.player.mpMax;
+    toast('Nivel '+G.player.level+'! HP y MP aumentados.');
+  }
+  actualizarHUD();
+}
+
+// =================== INTRO ===================
+function mostrarCrear(){showScreen('create');}
+function elegirCasa(btn){document.querySelectorAll('.house-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');G.player.house=btn.dataset.house;}
+
+function empezarJuego(){
+  var name=document.getElementById('input-name').value.trim();
+  if(!name){toast('Escribe tu nombre');return;}
+  if(!G.player.house){toast('Elige tu casa');return;}
+  G.player.name=name;guardar();entrarMapa();
+}
+
+function continuarJuego(){
+  var raw=localStorage.getItem('hp3d_v2');
+  if(!raw){toast('Sin partida guardada');return;}
+  Object.assign(G.player,JSON.parse(raw));entrarMapa();
+}
+
+// =================== MAPA ===================
+function entrarMapa(){
+  hideScreen('intro');hideScreen('create');
+  setScene('map');
+  document.getElementById('hud').classList.add('visible');
+  actualizarHUD();renderZonas();cerrarPaneles();
+}
+
+function renderZonas(){
+  var grid=document.getElementById('zones-grid');grid.innerHTML='';
+  Object.keys(ZONAS).forEach(function(zid){
+    var zinfo=ZONAS[zid];
+    var m=MISIONES[zid];
+    var hecho=G.player.completed.indexOf(zid)>=0;
+    var bloq=m.requiere&&G.player.completed.indexOf(m.requiere)<0;
+    var div=document.createElement('div');
+    div.className='zone-card '+(hecho?'completed':bloq?'locked':'available');
+    div.innerHTML='<span class="zone-icon-big">'+zinfo.icon+'</span><span class="zone-name">'+zinfo.nombre+'</span><span class="zone-status">'+(hecho?'Completada':bloq?'Bloqueada':'Disponible')+'</span>';
+    if(!bloq&&!hecho)(function(z){div.onclick=function(){entrarMision(z);};})(zid);
+    grid.appendChild(div);
+  });
+}
+
+function toggleMap(){
+  var p=document.getElementById('map-panel');
+  if(p.classList.contains('open')){p.classList.remove('open');}
+  else{cerrarPaneles();renderZonas();p.classList.add('open');}
+}
+
+// =================== MISION ===================
+function entrarMision(zid){
+  G.misionActual=zid;cerrarPaneles();
+  var escMap={hall:'hall',alley:'alley',forest:'forest',quid:'quid'};
+  setScene(escMap[MISIONES[zid].escena]||'hall');
+  irNodo('start');
+}
+
+var typeInt=null;
+function irNodo(nodoId){
+  if(nodoId==='_mapa'){cerrarPaneles();entrarMapa();return;}
+  if(nodoId.indexOf('_combate_')===0){iniciarCombate(nodoId.replace('_combate_',''));return;}
+  var nodo=MISIONES[G.misionActual].nodos[nodoId];
+  if(!nodo)return;
+  document.getElementById('dlg-speaker').textContent=nodo.personaje||'';
+  document.getElementById('dlg-choices').innerHTML='';
+  if(typeInt)clearInterval(typeInt);
+  var el=document.getElementById('dlg-text');el.textContent='';
+  var i=0,txt=nodo.texto||'';
+  typeInt=setInterval(function(){
+    if(i<txt.length){el.textContent+=txt[i++];}
+    else{clearInterval(typeInt);renderOpciones(nodo.opciones||[]);}
+  },20);
+  document.getElementById('bottom-panel').classList.add('open');
+}
+
+function renderOpciones(opciones){
+  var cont=document.getElementById('dlg-choices');cont.innerHTML='';
+  opciones.forEach(function(op){
+    var btn=document.createElement('button');btn.className='choice-btn';btn.textContent=op.texto;
+    btn.onclick=function(){if(op.reward)mostrarRecompensa(op.reward);else if(op.siguiente)irNodo(op.siguiente);};
+    cont.appendChild(btn);
+  });
+}
+
+// =================== COMBATE ===================
+function iniciarCombate(enemyId){
+  var eData=ENEMIGOS[enemyId];
+  G.combat.enemy=JSON.parse(JSON.stringify(eData));
+  G.combat.enemyId=enemyId;G.combat.active=true;
+  setScene(eData.escena);
+  cerrarPaneles();
+  document.getElementById('enemy-name').textContent=eData.name;
+  document.getElementById('combat-log').innerHTML='';
+  actualizarBarrasCombate();renderHechizos();
+  document.getElementById('combat-panel').classList.add('open');
+  document.getElementById('turn-ind').style.display='block';
+  addLog('Combate! '+eData.name+' aparece!','');
+}
+
+function actualizarBarrasCombate(){
+  var e=G.combat.enemy,p=G.player;
+  document.getElementById('enemy-hp-fill').style.width=Math.max(0,e.hp/e.hpMax*100)+'%';
+  document.getElementById('enemy-hp-txt').textContent=Math.max(0,e.hp)+'/'+e.hpMax;
+  actualizarHUD();
+}
+
+function addLog(msg,cls){
+  var log=document.getElementById('combat-log');
+  var d=document.createElement('div');d.className=cls;d.textContent=msg;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+
+function renderHechizos(){
+  var grid=document.getElementById('spells-grid');grid.innerHTML='';
+  G.player.spells.forEach(function(sid){
+    var sp=HECHIZOS[sid];
+    var btn=document.createElement('button');btn.className='spell-btn';btn.disabled=!G.combat.active||G.player.mp<sp.cost;
+    btn.innerHTML='<span class="spell-icon">'+sp.icon+'</span><span class="spell-name">'+sp.name+'</span><span class="spell-stats">MP:'+sp.cost+' DMG:'+sp.dmg[0]+'-'+sp.dmg[1]+'</span>';
+    btn.onclick=function(){lanzarHechizo(sid);};grid.appendChild(btn);
+  });
+  var pot=G.player.items.pocion||0;
+  var pb=document.createElement('button');pb.className='spell-btn';pb.disabled=pot===0;
+  pb.innerHTML='<span class="spell-icon">&#x2697;</span><span class="spell-name">Pocion</span><span class="spell-stats">'+pot+' | +30 HP</span>';
+  pb.onclick=usarPocion;grid.appendChild(pb);
+}
+
+function lanzarHechizo(sid){
+  if(!G.combat.active)return;
+  var sp=HECHIZOS[sid],p=G.player,e=G.combat.enemy;
+  if(p.mp<sp.cost){toast('Sin mana');return;}
+  renderHechizos();document.getElementById('turn-ind').style.display='none';
+  var dmg=rand(sp.dmg[0],sp.dmg[1]);
+  p.mp-=sp.cost;e.hp-=dmg;
+  addLog(sp.name+': '+dmg+' dano al enemigo','log-magic');
+  actualizarBarrasCombate();
+  if(e.hp<=0){terminarCombate(true);return;}
+  setTimeout(function(){
+    if(!G.combat.active)return;
+    var edm=rand(e.dmgMin,e.dmgMax);p.hp=Math.max(1,p.hp-edm);
+    addLog(e.name+': '+edm+' dano a ti','log-dmg');
+    actualizarBarrasCombate();renderHechizos();document.getElementById('turn-ind').style.display='block';
+    if(p.hp<=1){p.hp=Math.floor(p.hpMax*0.3);terminarCombate(false);}
+  },700);
+}
+
+function usarPocion(){
+  if(!(G.player.items.pocion>0))return;
+  G.player.items.pocion--;var h=30;G.player.hp=Math.min(G.player.hpMax,G.player.hp+h);
+  addLog('Pocion: +'+h+' HP','log-heal');actualizarBarrasCombate();renderHechizos();
+}
+
+function terminarCombate(gano){
+  G.combat.active=false;document.getElementById('turn-ind').style.display='none';
+  var eid=G.combat.enemyId;
+  setTimeout(function(){
+    document.getElementById('combat-panel').classList.remove('open');
+    var m=MISIONES[G.misionActual];
+    var escMap={hall:'hall',alley:'alley',forest:'forest',quid:'quid'};
+    setScene(escMap[m.escena]||'hall');
+    if(gano){addLog('Victoria!','log-win');irNodo('win_'+eid);}
+    else{irNodo('lose_'+eid);}
+  },1200);
+}
+
+// =================== RECOMPENSA ===================
+function mostrarRecompensa(reward){
+  G.player.completed.push(G.misionActual);
+  ganarXP(reward.xp||0);
+  if(reward.items)Object.keys(reward.items).forEach(function(k){G.player.items[k]=(G.player.items[k]||0)+reward.items[k];});
+  if(reward.hechizo&&G.player.spells.indexOf(reward.hechizo)<0){
+    G.player.spells.push(reward.hechizo);
+    toast('Nuevo hechizo: '+HECHIZOS[reward.hechizo].name+'!');
+  }
+  document.getElementById('rew-icon').innerHTML=reward.icon||'&#x1F3C6;';
+  document.getElementById('rew-msg').textContent=reward.msg||'';
+  var items=document.getElementById('rew-items');
+  items.innerHTML='<div class="reward-item">Experiencia <span class="reward-val">+'+reward.xp+' XP</span></div>';
+  if(reward.items)Object.keys(reward.items).forEach(function(k){items.innerHTML+='<div class="reward-item">Pocion <span class="reward-val">+'+reward.items[k]+'</span></div>';});
+  if(reward.hechizo){var sp=HECHIZOS[reward.hechizo];items.innerHTML+='<div class="reward-item">'+sp.name+' <span class="reward-val">NUEVO</span></div>';}
+  guardar();cerrarPaneles();showScreen('reward');
+}
+
+function despuesRecompensa(){hideScreen('reward');entrarMapa();}
+
+// =================== GUARDADO ===================
+function guardar(){localStorage.setItem('hp3d_v2',JSON.stringify(G.player));}
+
+// =================== INIT ===================
+function init(){
+  var bg=document.getElementById('stars-bg');
+  for(var i=0;i<80;i++){
+    var s=document.createElement('div');s.className='star';
+    var sz=Math.random()*2.5+0.5;
+    s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation-delay:'+Math.random()*2+'s;animation-duration:'+(1.5+Math.random()*2)+'s';
+    bg.appendChild(s);
+  }
+  if(localStorage.getItem('hp3d_v2'))document.getElementById('btn-continuar').style.display='block';
+  initRenderer();
+  setScene('map');
+}
+
+init();
+</script>
+</body>
+</html>
