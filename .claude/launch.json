@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hp-aventura",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "hp-aventura"],
+      "port": 5500
+    },
+    {
+      "name": "fortnite-launcher-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5501", "--directory", "fortnite-launcher-web"],
+      "port": 5501
+    }
+  ]
+}

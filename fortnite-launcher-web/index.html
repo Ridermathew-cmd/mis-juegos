@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fortnite Launcher Ligero</title>
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --sidebar: #0f0f11;
+    --card: #18181b;
+    --border: #333338;
+    --text: #ffffff;
+    --text-secondary: #9a9a9f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 16px 60px;
+  }
+  .logo {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    margin-top: 4px;
+    margin-bottom: 32px;
+    font-size: 14px;
+  }
+  .download-btn {
+    background: #ffffff;
+    color: #0a0a0c;
+    font-weight: 700;
+    font-size: 18px;
+    padding: 16px 40px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .download-btn:hover { background: #e6e6e6; }
+  .meta {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 40px;
+  }
+  .features {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .card h3 {
+    margin: 0 0 8px;
+    font-size: 14px;
+  }
+  .card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .requirements {
+    width: 100%;
+    max-width: 640px;
+    background: var(--sidebar);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .requirements h3 {
+    color: var(--text);
+    margin-top: 0;
+    font-size: 14px;
+  }
+  .requirements ul { margin: 8px 0 0; padding-left: 20px; }
+  .requirements li { margin-bottom: 4px; }
+  footer {
+    margin-top: 48px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
+  }
+  footer a { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+  <div class="logo">FORTNITE</div>
+  <div class="subtitle">Launcher Ligero — para PC de bajos recursos</div>
+
+  <a class="download-btn" href="./downloads/FortniteLauncherLigero.zip" download>Descargar para Windows (.zip)</a>
+  <div class="meta">Windows 10/11 (64-bit) · gratis · 63 MB</div>
+
+  <div class="features">
+    <div class="card">
+      <h3>Máximo rendimiento</h3>
+      <p>Sube la prioridad del proceso, activa el plan de energía Ultimate Performance y libera RAM antes de jugar.</p>
+    </div>
+    <div class="card">
+      <h3>Mandos de cualquier plataforma</h3>
+      <p>Detecta mandos Xbox, PlayStation, Switch Pro y genéricos, y avisa si necesitás DS4Windows o BetterJoy.</p>
+    </div>
+    <div class="card">
+      <h3>Calidad gráfica ajustable</h3>
+      <p>Elegí entre Rendimiento o Calidad antes de jugar, sin entrar al menú de video del juego.</p>
+    </div>
+    <div class="card">
+      <h3>Promociones de Epic Games</h3>
+      <p>Mostrá los juegos gratis actuales y el próximo, con acceso directo a la tienda.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3>Antes de instalar</h3>
+    <ul>
+      <li>Descargá el .zip, descomprimilo en una carpeta y ejecutá <code>FortniteLauncher.exe</code> desde ahí (no lo saques de la carpeta: necesita los archivos que vienen al lado).</li>
+      <li>Necesitás tener Epic Games Launcher y Fortnite ya instalados: este launcher no los reemplaza, los abre directo.</li>
+      <li>No pide permisos de administrador ni modifica archivos del juego.</li>
+      <li>Windows puede mostrar un aviso de SmartScreen por ser una app nueva sin firmar — es normal en apps de un solo desarrollador; podés elegir "Más información → Ejecutar de todas formas".</li>
+    </ul>
+  </div>
+
+  <footer>
+    Código abierto — <a href="https://github.com/Ridermathew-cmd/mateo_claude/tree/main/fortnite-launcher" target="_blank" rel="noopener">ver el código fuente</a>
+  </footer>
+
+</body>
+</html>
