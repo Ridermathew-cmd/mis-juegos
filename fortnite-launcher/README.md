@@ -17,7 +17,18 @@ Windows (no se puede re-temear sin una ventana sin bordes hecha a medida).
 
 - Detecta si Epic Games Launcher y Fortnite estan instalados (lee los
   manifiestos en `C:\ProgramData\Epic\EpicGamesLauncher\Data\Manifests`).
-- Boton "JUGAR" que abre Fortnite directo.
+  No hace falta tenerlos instalados de antes:
+  - Si falta **Epic Games Launcher**, el boton principal cambia a "Instalar
+    Epic Games Launcher": descarga el instalador oficial (mismo archivo que
+    entrega epicgames.com) y lo abre para que lo instales vos mismo, viendo
+    sus propios terminos.
+  - Si falta **Fortnite** (pero Epic Games Launcher si esta), el boton pasa a
+    "Instalar Fortnite": abre Epic Games Launcher directo en la pagina de
+    Fortnite para que le des a instalar ahi. No se puede saltar este paso:
+    Fortnite usa anti-cheat (Easy Anti-Cheat) y controles de cuenta que solo
+    Epic puede instalar/verificar, asi que la descarga del juego en si
+    siempre la maneja Epic.
+  - Si los dos ya estan, el boton es "JUGAR" y abre Fortnite directo.
 - Panel de mandos conectados: detecta mandos Xbox/XInput y cualquier otro
   mando USB/Bluetooth reconocido por Windows (PlayStation, Switch Pro,
   genericos). Si un mando no es XInput, avisa que puede necesitar
@@ -112,7 +123,9 @@ dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile
 
 ## Notas
 
-- Requiere Windows con Epic Games Launcher y Fortnite ya instalados: el
-  launcher no descarga ni instala nada, solo organiza el inicio.
+- Requiere Windows. Epic Games Launcher y Fortnite pueden no estar instalados
+  todavia: el launcher te guia para instalarlos (ver arriba), pero la
+  instalacion en si siempre corre a traves de las herramientas oficiales de
+  Epic, con sus propios terminos y elevacion de Windows (UAC).
 - El perfil de rendimiento solo cambia la prioridad del proceso; no modifica
   archivos del juego ni el anti-cheat.

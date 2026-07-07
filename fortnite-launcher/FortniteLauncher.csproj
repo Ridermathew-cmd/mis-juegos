@@ -9,6 +9,7 @@
     <AssemblyName>FortniteLauncher</AssemblyName>
     <RootNamespace>FortniteLauncher</RootNamespace>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
 
 </Project>

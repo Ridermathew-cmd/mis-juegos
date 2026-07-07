@@ -9,6 +9,14 @@ namespace FortniteLauncher;
 
 public class MainForm : Form
 {
+    private enum PlayButtonState
+    {
+        InstallEpicLauncher,
+        InstallFortnite,
+        Ready
+    }
+
+
     private static readonly Color BgDark = Color.FromArgb(15, 15, 17);
     private static readonly Color SidebarBg = Color.FromArgb(10, 10, 12);
     private static readonly Color NavHover = Color.FromArgb(35, 35, 40);
@@ -45,20 +53,45 @@ public class MainForm : Form
 
     private readonly FlowLayoutPanel _promotionsPanel;
     private readonly Label _promotionsStatusLabel;
+    private readonly Button _fullscreenButton;
 
     private EpicGameInfo? _fortnite;
+    private PlayButtonState _playState = PlayButtonState.InstallEpicLauncher;
+
+    private bool _isFullScreen;
+    private FormWindowState _restoreWindowState;
+    private FormBorderStyle _restoreBorderStyle;
+    private Rectangle _restoreBounds;
 
     public MainForm()
     {
         Text = "Fortnite Launcher Ligero";
         ClientSize = new Size(580, 560);
-        FormBorderStyle = FormBorderStyle.FixedDialog;
-        MaximizeBox = false;
+        MinimumSize = new Size(580, 560);
+        FormBorderStyle = FormBorderStyle.Sizable;
+        MaximizeBox = true;
         StartPosition = FormStartPosition.CenterScreen;
         BackColor = BgDark;
+        KeyPreview = true;
+        KeyDown += OnMainFormKeyDown;
+
+        try
+        {
+            Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
+        catch
+        {
+            // Si no se puede extraer, se queda con el icono por defecto.
+        }
 
         // --- Sidebar ---
-        var sidebar = new Panel { Location = new Point(0, 0), Size = new Size(150, 560), BackColor = SidebarBg };
+        var sidebar = new Panel
+        {
+            Location = new Point(0, 0),
+            Size = new Size(150, 560),
+            BackColor = SidebarBg,
+            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+        };
 
         var logo = new Label
         {
@@ -84,11 +117,16 @@ public class MainForm : Form
         _navControllers = CreateNavButton("Mandos", 132);
         _navPromo = CreateNavButton("Promociones", 174);
 
+        _fullscreenButton = CreateFlatButton("Pantalla completa", new Point(10, 514), new Size(130, 30));
+        _fullscreenButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _fullscreenButton.Click += (_, _) => ToggleFullScreen();
+
         sidebar.Controls.Add(logo);
         sidebar.Controls.Add(subtitle);
         sidebar.Controls.Add(_navPerf);
         sidebar.Controls.Add(_navControllers);
         sidebar.Controls.Add(_navPromo);
+        sidebar.Controls.Add(_fullscreenButton);
 
         _statusLabel = new Label
         {
@@ -103,9 +141,10 @@ public class MainForm : Form
         var contentLocation = new Point(166, 55);
         var contentSize = new Size(400, 445);
 
-        _perfPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = true };
-        _controllersPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false };
-        _promoPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false };
+        var panelAnchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+        _perfPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = true, Anchor = panelAnchor };
+        _controllersPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false, Anchor = panelAnchor };
+        _promoPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false, Anchor = panelAnchor };
 
         // --- Panel Rendimiento ---
         _chkPriority = CreateCheckBox("Subir prioridad del proceso de Fortnite", 0, true);
@@ -187,7 +226,8 @@ public class MainForm : Form
             Size = new Size(400, 445),
             BackColor = CardBg,
             ForeColor = Color.White,
-            BorderStyle = BorderStyle.FixedSingle
+            BorderStyle = BorderStyle.FixedSingle,
+            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
         _controllersPanel.Controls.Add(_controllerList);
 
@@ -202,6 +242,7 @@ public class MainForm : Form
         };
 
         var refreshPromotionsButton = CreateFlatButton("Actualizar", new Point(322, 0), new Size(78, 26));
+        refreshPromotionsButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
         refreshPromotionsButton.Click += (_, _) => _ = RefreshPromotionsAsync();
 
         _promotionsPanel = new FlowLayoutPanel
@@ -211,7 +252,8 @@ public class MainForm : Form
             FlowDirection = FlowDirection.TopDown,
             WrapContents = false,
             AutoScroll = true,
-            BackColor = BgDark
+            BackColor = BgDark,
+            Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
 
         _promoPanel.Controls.Add(_promotionsStatusLabel);
@@ -228,7 +270,8 @@ public class MainForm : Form
             FlatStyle = FlatStyle.Flat,
             BackColor = Color.White,
             ForeColor = Color.Black,
-            Enabled = false
+            Enabled = false,
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
         _playButton.FlatAppearance.BorderSize = 0;
         _playButton.Click += OnPlayClicked;
@@ -316,6 +359,42 @@ public class MainForm : Form
         return button;
     }
 
+    private void OnMainFormKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode == Keys.F11)
+        {
+            ToggleFullScreen();
+        }
+        else if (e.KeyCode == Keys.Escape && _isFullScreen)
+        {
+            ToggleFullScreen();
+        }
+    }
+
+    private void ToggleFullScreen()
+    {
+        if (!_isFullScreen)
+        {
+            _restoreBorderStyle = FormBorderStyle;
+            _restoreWindowState = WindowState;
+            _restoreBounds = Bounds;
+
+            FormBorderStyle = FormBorderStyle.None;
+            WindowState = FormWindowState.Maximized;
+            _isFullScreen = true;
+            _fullscreenButton.Text = "Salir (Esc)";
+        }
+        else
+        {
+            WindowState = FormWindowState.Normal;
+            FormBorderStyle = _restoreBorderStyle;
+            WindowState = _restoreWindowState;
+            Bounds = _restoreBounds;
+            _isFullScreen = false;
+            _fullscreenButton.Text = "Pantalla completa";
+        }
+    }
+
     private void ShowPanel(Panel panelToShow, Button navButton)
     {
         _perfPanel.Visible = panelToShow == _perfPanel;
@@ -333,19 +412,34 @@ public class MainForm : Form
     {
         if (!EpicGameFinder.IsEpicGamesLauncherInstalled())
         {
-            _statusLabel.Text = "No se encontro Epic Games Launcher instalado.";
+            _statusLabel.Text = "Epic Games Launcher no esta instalado en esta PC.";
+            SetPlayButtonState(PlayButtonState.InstallEpicLauncher);
             return;
         }
 
         _fortnite = EpicGameFinder.FindFortnite();
         if (_fortnite is null)
         {
-            _statusLabel.Text = "Epic Games Launcher encontrado, pero Fortnite no parece estar instalado.";
+            _statusLabel.Text = "Epic Games Launcher esta instalado, pero Fortnite no. Instalalo desde ahi.";
+            SetPlayButtonState(PlayButtonState.InstallFortnite);
             return;
         }
 
         _statusLabel.Text = $"Fortnite detectado en: {_fortnite.InstallLocation}";
+        SetPlayButtonState(PlayButtonState.Ready);
+    }
+
+    private void SetPlayButtonState(PlayButtonState state)
+    {
+        _playState = state;
         _playButton.Enabled = true;
+        _playButton.Text = state switch
+        {
+            PlayButtonState.InstallEpicLauncher => "INSTALAR EPIC GAMES LAUNCHER",
+            PlayButtonState.InstallFortnite => "INSTALAR FORTNITE",
+            PlayButtonState.Ready => "JUGAR",
+            _ => "JUGAR"
+        };
     }
 
     private void RefreshControllers()
@@ -491,7 +585,68 @@ public class MainForm : Form
         return card;
     }
 
-    private void OnPlayClicked(object? sender, EventArgs e)
+    private async void OnPlayClicked(object? sender, EventArgs e)
+    {
+        switch (_playState)
+        {
+            case PlayButtonState.InstallEpicLauncher:
+                await HandleInstallEpicLauncherAsync();
+                return;
+            case PlayButtonState.InstallFortnite:
+                HandleOpenFortniteInstall();
+                return;
+        }
+
+        LaunchFortnite();
+    }
+
+    private async Task HandleInstallEpicLauncherAsync()
+    {
+        var confirm = MessageBox.Show(
+            "Se va a descargar el instalador oficial de Epic Games Launcher desde epicgames.com y se va a abrir para que lo instales vos. ¿Continuar?",
+            "Instalar Epic Games Launcher",
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Information);
+
+        if (confirm != DialogResult.OK) return;
+
+        _playButton.Enabled = false;
+        _playButton.Text = "Descargando...";
+
+        var success = await EpicLauncherInstaller.DownloadAndRunInstallerAsync();
+
+        if (!success)
+        {
+            MessageBox.Show(
+                "No se pudo descargar o abrir el instalador. Revisá tu conexión e intentá de nuevo.",
+                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            SetPlayButtonState(PlayButtonState.InstallEpicLauncher);
+            return;
+        }
+
+        DetectFortnite();
+    }
+
+    private void HandleOpenFortniteInstall()
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("com.epicgames.launcher://store/p/fortnite") { UseShellExecute = true });
+        }
+        catch
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo("https://store.epicgames.com/es-ES/p/fortnite") { UseShellExecute = true });
+            }
+            catch
+            {
+                // Sin navegador ni Epic Games Launcher disponibles: se ignora.
+            }
+        }
+    }
+
+    private void LaunchFortnite()
     {
         if (_fortnite is null) return;
 
