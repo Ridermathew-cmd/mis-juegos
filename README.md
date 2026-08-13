@@ -9,4 +9,4 @@ Colección de juegos web para jugar desde el celular.
 
 ## Herramientas
 
-- [Fortnite Launcher Ligero 🚀](./fortnite-launcher-web/) — Página de descarga del launcher liviano para Windows
+- [Fortnite Launcher Ligero 🚀](./fortnite-launcher-web/) — Página de descarga del launcher liviano para Windows (link corto: https://tinyurl.com/fortnite-lite-launcher)
