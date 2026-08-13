@@ -50,13 +50,19 @@ public class MainForm : Form
     private readonly Button _gameModeButton;
     private readonly Label _gameDvrStatusLabel;
     private readonly Button _gameDvrButton;
+    private readonly CheckBox _chkEmptyRecycleBin;
+    private readonly Button _cleanupButton;
+    private readonly Label _cleanupStatusLabel;
 
     private readonly FlowLayoutPanel _promotionsPanel;
     private readonly Label _promotionsStatusLabel;
     private readonly Button _fullscreenButton;
+    private readonly Button _updateButton;
+    private readonly Label _updateStatusLabel;
 
     private EpicGameInfo? _fortnite;
     private PlayButtonState _playState = PlayButtonState.InstallEpicLauncher;
+    private UpdateInfo? _pendingUpdate;
 
     private bool _isFullScreen;
     private FormWindowState _restoreWindowState;
@@ -121,12 +127,30 @@ public class MainForm : Form
         _fullscreenButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
         _fullscreenButton.Click += (_, _) => ToggleFullScreen();
 
+        _updateStatusLabel = new Label
+        {
+            Text = $"v{UpdateManager.CurrentVersion}",
+            Font = new Font("Segoe UI", 7.5f),
+            ForeColor = TextSecondary,
+            BackColor = SidebarBg,
+            AutoSize = true,
+            Location = new Point(12, 444),
+            Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+            MaximumSize = new Size(130, 0)
+        };
+
+        _updateButton = CreateFlatButton("Buscar actualizaciones", new Point(10, 466), new Size(130, 28));
+        _updateButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+        _updateButton.Click += OnUpdateButtonClicked;
+
         sidebar.Controls.Add(logo);
         sidebar.Controls.Add(subtitle);
         sidebar.Controls.Add(_navPerf);
         sidebar.Controls.Add(_navControllers);
         sidebar.Controls.Add(_navPromo);
         sidebar.Controls.Add(_fullscreenButton);
+        sidebar.Controls.Add(_updateStatusLabel);
+        sidebar.Controls.Add(_updateButton);
 
         _statusLabel = new Label
         {
@@ -142,7 +166,7 @@ public class MainForm : Form
         var contentSize = new Size(400, 445);
 
         var panelAnchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        _perfPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = true, Anchor = panelAnchor };
+        _perfPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = true, Anchor = panelAnchor, AutoScroll = true };
         _controllersPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false, Anchor = panelAnchor };
         _promoPanel = new Panel { Location = contentLocation, Size = contentSize, BackColor = BgDark, Visible = false, Anchor = panelAnchor };
 
@@ -212,11 +236,36 @@ public class MainForm : Form
         _gameDvrButton = CreateFlatButton("Activar/Desactivar", new Point(0, 404), new Size(180, 28));
         _gameDvrButton.Click += OnToggleGameDvr;
 
+        var cleanupLabel = new Label
+        {
+            Text = "Limpieza de Windows:",
+            ForeColor = Color.White,
+            BackColor = BgDark,
+            AutoSize = true,
+            Location = new Point(0, 440)
+        };
+
+        _chkEmptyRecycleBin = CreateCheckBox("Vaciar tambien la papelera de reciclaje", 462, false);
+
+        _cleanupButton = CreateFlatButton("Limpiar archivos temporales", new Point(0, 488), new Size(200, 28));
+        _cleanupButton.Click += OnCleanupClicked;
+
+        _cleanupStatusLabel = new Label
+        {
+            Text = "",
+            ForeColor = TextSecondary,
+            BackColor = BgDark,
+            AutoSize = true,
+            Location = new Point(0, 522),
+            MaximumSize = new Size(380, 0)
+        };
+
         _perfPanel.Controls.AddRange(new Control[]
         {
             _chkPriority, _chkPowerPlan, _chkTrimMemory, _chkCloseApps, _heavyAppsList, refreshAppsButton,
             graphicsLabel, _radRendimiento, _radCalidad, _radSinCambios, _graphicsStatusLabel,
-            _gameModeStatusLabel, _gameModeButton, _gameDvrStatusLabel, _gameDvrButton
+            _gameModeStatusLabel, _gameModeButton, _gameDvrStatusLabel, _gameDvrButton,
+            cleanupLabel, _chkEmptyRecycleBin, _cleanupButton, _cleanupStatusLabel
         });
 
         // --- Panel Mandos ---
@@ -299,7 +348,87 @@ public class MainForm : Form
             RefreshGameModeStatus();
             RefreshGameDvrStatus();
             _ = RefreshPromotionsAsync();
+            _ = CheckForUpdateOnStartupAsync();
         };
+    }
+
+    private async Task CheckForUpdateOnStartupAsync()
+    {
+        var update = await UpdateManager.CheckForUpdateAsync();
+        _pendingUpdate = update;
+
+        if (update is null)
+        {
+            _updateButton.Text = "Buscar actualizaciones";
+            return;
+        }
+
+        _updateButton.Text = $"Actualizar a v{update.Version}";
+        _updateStatusLabel.Text = $"v{UpdateManager.CurrentVersion} → v{update.Version} disponible";
+
+        var confirm = MessageBox.Show(
+            $"Hay una actualizacion disponible (v{update.Version}, version actual v{UpdateManager.CurrentVersion}). " +
+            "Se va a descargar, la app se va a cerrar y va a volver a abrirse actualizada. ¿Actualizar ahora?",
+            "Actualizacion disponible",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Information);
+
+        if (confirm == DialogResult.Yes)
+        {
+            await DownloadAndApplyUpdateAsync(update);
+        }
+    }
+
+    private async void OnUpdateButtonClicked(object? sender, EventArgs e)
+    {
+        if (_pendingUpdate is null)
+        {
+            _updateButton.Enabled = false;
+            _updateButton.Text = "Buscando...";
+
+            var update = await UpdateManager.CheckForUpdateAsync();
+            _pendingUpdate = update;
+            _updateButton.Enabled = true;
+
+            if (update is null)
+            {
+                _updateButton.Text = "Buscar actualizaciones";
+                _updateStatusLabel.Text = $"v{UpdateManager.CurrentVersion} (al dia)";
+                return;
+            }
+
+            _updateButton.Text = $"Actualizar a v{update.Version}";
+            _updateStatusLabel.Text = $"v{UpdateManager.CurrentVersion} → v{update.Version} disponible";
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Hay una version nueva disponible (v{_pendingUpdate.Version}). Se va a descargar, la app se va a cerrar y va a volver a abrirse actualizada. ¿Continuar?",
+            "Actualizar Fortnite Launcher Ligero",
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Information);
+
+        if (confirm != DialogResult.OK) return;
+
+        await DownloadAndApplyUpdateAsync(_pendingUpdate);
+    }
+
+    private async Task DownloadAndApplyUpdateAsync(UpdateInfo update)
+    {
+        _updateButton.Enabled = false;
+        _updateStatusLabel.Text = "Descargando actualizacion...";
+
+        var ready = await UpdateManager.PrepareUpdateAsync(update);
+        if (!ready)
+        {
+            _updateButton.Enabled = true;
+            _updateStatusLabel.Text = "No se pudo descargar la actualizacion.";
+            MessageBox.Show("No se pudo descargar la actualizacion. Revisá tu conexión e intentá de nuevo.",
+                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
+
+        Application.Exit();
     }
 
     private Button CreateNavButton(string text, int y)
@@ -498,6 +627,39 @@ public class MainForm : Form
         var newState = !PerformanceTools.IsGameDvrEnabled();
         PerformanceTools.SetGameDvrEnabled(newState);
         RefreshGameDvrStatus();
+    }
+
+    private async void OnCleanupClicked(object? sender, EventArgs e)
+    {
+        var includeRecycleBin = _chkEmptyRecycleBin.Checked;
+
+        var confirm = MessageBox.Show(
+            includeRecycleBin
+                ? "Se van a borrar los archivos temporales de Windows y se va a vaciar la papelera de reciclaje. No se puede deshacer. ¿Continuar?"
+                : "Se van a borrar los archivos temporales de Windows. No se puede deshacer. ¿Continuar?",
+            "Limpieza de Windows",
+            MessageBoxButtons.OKCancel,
+            MessageBoxIcon.Warning);
+
+        if (confirm != DialogResult.OK) return;
+
+        _cleanupButton.Enabled = false;
+        _cleanupStatusLabel.Text = "Limpiando...";
+
+        var result = await Task.Run(() =>
+        {
+            var cleanupResult = WindowsCleanup.CleanTempFiles();
+            if (includeRecycleBin)
+            {
+                WindowsCleanup.EmptyRecycleBin();
+            }
+            return cleanupResult;
+        });
+
+        _cleanupButton.Enabled = true;
+        var freedMb = result.BytesFreed / 1024.0 / 1024.0;
+        var skippedNote = result.FilesSkipped > 0 ? $" ({result.FilesSkipped} en uso, omitidos)" : "";
+        _cleanupStatusLabel.Text = $"Listo: {result.FilesDeleted} archivos borrados, {freedMb:0.#} MB liberados{skippedNote}";
     }
 
     private async Task RefreshPromotionsAsync()

@@ -76,11 +76,39 @@ falta.
 - **Grabacion en segundo plano (Game DVR)**: boton para desactivar la
   grabacion de fondo de Xbox Game Bar, que consume CPU/RAM aunque no estes
   grabando nada. Tambien es un ajuste general del sistema, persistente.
+- **Limpieza de Windows**: boton para borrar archivos temporales (los del
+  usuario y los de `C:\Windows\Temp`), con la opcion de vaciar tambien la
+  papelera de reciclaje. Pide confirmacion antes de borrar (no se puede
+  deshacer) y muestra cuanto espacio libero. Solo toca carpetas de
+  temporales conocidas, nunca archivos del juego ni del sistema.
 
 Nota: si cerrás el launcher mientras Fortnite sigue abierto, el plan de
 energia no se restaura automaticamente (la app que lo hace ya se cerro).
 En ese caso se puede volver al plan anterior a mano con
 `powercfg /setactive <GUID>` o desde la Configuracion de Windows.
+
+## Auto-actualizacion del launcher
+
+Esto actualiza el **launcher en si** (no Fortnite: eso ya lo actualiza Epic
+Games Launcher solo). Al abrir la app, chequea en segundo plano
+`fortnite-launcher-web/downloads/version.json` (publicado en la misma pagina
+de descarga). Si el `version` de ahi es mas nuevo que `UpdateManager.CurrentVersion`
+(en [UpdateManager.cs](UpdateManager.cs)), muestra un cartel para confirmar,
+descarga el `.zip` del `downloadUrl`, cierra la app, copia los archivos
+nuevos encima de los actuales (via un script `robocopy` temporal, porque el
+proceso no puede sobreescribir su propio `.exe` mientras corre) y la vuelve a
+abrir. Tambien hay un boton "Buscar actualizaciones" en la barra lateral para
+chequear a mano.
+
+**Para publicar una actualizacion nueva:**
+1. Subir el numero de version en `UpdateManager.CurrentVersion`
+   (formato `Major.Minor.Patch`, se compara con `System.Version`).
+2. Compilar y publicar (ver mas abajo), reemplazar el `.zip` en
+   `fortnite-launcher-web/downloads/FortniteLauncherLigero.zip`.
+3. Actualizar `fortnite-launcher-web/downloads/version.json` con el mismo
+   numero de version nuevo (y el mismo `downloadUrl`, no cambia).
+4. Commit + push. Los usuarios con una version anterior van a ver el aviso la
+   proxima vez que abran el launcher.
 
 ## Requisitos para compilar
 
