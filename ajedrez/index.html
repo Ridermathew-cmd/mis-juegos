@@ -1036,7 +1036,15 @@ function resetProfile() {
 async function loginWithGoogle() {
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
+    await firebase.auth().signInWithRedirect(provider);
+  } catch(e) {
+    document.getElementById('name-error').textContent = 'Error: ' + (e.code || e.message);
+  }
+}
+
+// manejar el resultado cuando vuelve del redirect de Google
+firebase.auth().getRedirectResult().then(result => {
+  if (result && result.user) {
     const user = result.user;
     myName = user.displayName || user.email.split('@')[0];
     localStorage.setItem('chess_name', myName);
@@ -1044,10 +1052,10 @@ async function loginWithGoogle() {
     localStorage.removeItem('chess_pin');
     myPin = '';
     showScreen('screen-menu');
-  } catch(e) {
-    document.getElementById('name-error').textContent = 'Error: ' + (e.code || e.message);
   }
-}
+}).catch(e => {
+  console.error(e);
+});
 
 // ── TUTORIAL ──────────────────────────────────────────────────────
 const TUTORIAL_SLIDES = [
