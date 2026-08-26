@@ -156,6 +156,29 @@
   @media (max-width: 560px) {
     .services { grid-template-columns: 1fr; }
   }
+  .mac-banner {
+    display: none;
+    width: 100%;
+    max-width: 480px;
+    background: var(--sidebar);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .mac-banner p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 18px;
+  }
+  .mac-banner a.see-others {
+    display: block;
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+  }
   footer {
     margin-top: 48px;
     color: var(--text-secondary);
@@ -170,8 +193,16 @@
   <div class="logo">FORTNITE</div>
   <div class="subtitle">Launcher Ligero — para PC de bajos recursos</div>
 
-  <a class="download-btn" href="./downloads/FortniteLauncherLigero.zip" download>Descargar para Windows (.zip)</a>
-  <div class="meta">Windows 10/11 (64-bit) · gratis · 63 MB</div>
+  <div class="mac-banner" id="mac-banner">
+    <p>Estás en Mac. Fortnite no se puede instalar acá — Epic no lo ofrece en macOS desde 2020. Pero podés jugarlo gratis por streaming:</p>
+    <a class="play-btn" href="https://play.geforcenow.com/games?search=Fortnite" target="_blank" rel="noopener">Jugar ahora (GeForce NOW)</a>
+    <a class="see-others" href="#mac">Ver otras opciones</a>
+  </div>
+
+  <div id="win-download">
+    <a class="download-btn" href="./downloads/FortniteLauncherLigero.zip" download>Descargar para Windows (.zip)</a>
+    <div class="meta">Windows 10/11 (64-bit) · gratis · 63 MB</div>
+  </div>
 
   <div class="features">
     <div class="card">
@@ -244,5 +275,12 @@
     Compartí esta página: tinyurl.com/fortnite-lite-launcher
   </footer>
 
+<script>
+  var isMac = /Mac/.test(navigator.platform) && !/iPhone|iPad|iPod/.test(navigator.userAgent);
+  if (isMac) {
+    document.getElementById('mac-banner').style.display = 'block';
+    document.getElementById('win-download').style.display = 'none';
+  }
+</script>
 </body>
 </html>
