@@ -10,3 +10,4 @@ Colección de juegos web para jugar desde el celular.
 ## Herramientas
 
 - [Fortnite Launcher Ligero 🚀](./fortnite-launcher-web/) — Página de descarga del launcher liviano para Windows (link corto: https://tinyurl.com/fortnite-lite-launcher)
+- [Fortnite en Mac 🍎](./fortnite-launcher-web/mac.html) — Acceso directo a jugar Fortnite por streaming (GeForce NOW), ya que no hay instalación nativa en macOS

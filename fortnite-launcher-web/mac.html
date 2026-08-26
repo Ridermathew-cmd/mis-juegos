@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fortnite Launcher Ligero</title>
+<title>Fortnite en Mac</title>
 <style>
   :root {
     --bg: #0a0a0c;
@@ -18,7 +18,7 @@
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: -apple-system, "Segoe UI", Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,6 +35,8 @@
     margin-top: 4px;
     margin-bottom: 32px;
     font-size: 14px;
+    text-align: center;
+    max-width: 480px;
   }
   .download-btn {
     background: #ffffff;
@@ -52,6 +54,8 @@
     color: var(--text-secondary);
     font-size: 12px;
     margin-bottom: 40px;
+    text-align: center;
+    max-width: 480px;
   }
   .features {
     width: 100%;
@@ -94,6 +98,7 @@
   }
   .requirements ul { margin: 8px 0 0; padding-left: 20px; }
   .requirements li { margin-bottom: 4px; }
+  .requirements a { color: var(--text); }
   footer {
     margin-top: 48px;
     color: var(--text-secondary);
@@ -106,50 +111,43 @@
 <body>
 
   <div class="logo">FORTNITE</div>
-  <div class="subtitle">Launcher Ligero — para PC de bajos recursos</div>
+  <div class="subtitle">En Mac, Fortnite se juega por streaming (GeForce NOW) — Epic no ofrece instalación nativa desde 2020.</div>
 
-  <a class="download-btn" href="./downloads/FortniteLauncherLigero.zip" download>Descargar para Windows (.zip)</a>
-  <div class="meta">Windows 10/11 (64-bit) · gratis · 63 MB</div>
+  <a class="download-btn" href="https://play.geforcenow.com/games?search=Fortnite" target="_blank" rel="noopener">Jugar por streaming (GeForce NOW)</a>
+  <div class="meta">Abre GeForce NOW en el navegador · gratis para empezar</div>
 
   <div class="features">
     <div class="card">
-      <h3>Máximo rendimiento</h3>
-      <p>Sube la prioridad del proceso, activa el plan de energía Ultimate Performance y libera RAM antes de jugar.</p>
+      <h3>Sin instalación</h3>
+      <p>El juego corre en los servidores de NVIDIA y se transmite a tu Mac — no ocupa espacio en disco ni exige una Mac potente.</p>
     </div>
     <div class="card">
-      <h3>Mandos de cualquier plataforma</h3>
-      <p>Detecta mandos Xbox, PlayStation, Switch Pro y genéricos, y avisa si necesitás DS4Windows o BetterJoy.</p>
+      <h3>Tu cuenta de Epic de siempre</h3>
+      <p>Iniciás sesión con tu cuenta real de Epic Games dentro de GeForce NOW: mismo progreso, mismos objetos.</p>
     </div>
     <div class="card">
-      <h3>Calidad gráfica ajustable</h3>
-      <p>Elegí entre Rendimiento o Calidad antes de jugar, sin entrar al menú de video del juego.</p>
+      <h3>Nivel gratis disponible</h3>
+      <p>La membresía gratis de GeForce NOW alcanza para jugar (con espera en cola); las pagas dan acceso prioritario y mejor calidad.</p>
     </div>
     <div class="card">
-      <h3>Promociones de Epic Games</h3>
-      <p>Mostrá los juegos gratis actuales y el próximo, con acceso directo a la tienda.</p>
-    </div>
-    <div class="card">
-      <h3>Limpieza de Windows</h3>
-      <p>Borra archivos temporales y vacía la papelera de reciclaje con un clic, para liberar espacio.</p>
+      <h3>App nativa opcional</h3>
+      <p>Para mejor rendimiento que el navegador, NVIDIA tiene una app de GeForce NOW para Mac (enlace abajo).</p>
     </div>
   </div>
 
   <div class="requirements">
-    <h3>Antes de instalar</h3>
+    <h3>Por qué no hay instalador nativo</h3>
     <ul>
-      <li>Descargá el .zip, descomprimilo en una carpeta y ejecutá <code>FortniteLauncher.exe</code> desde ahí (no lo saques de la carpeta: necesita los archivos que vienen al lado).</li>
-      <li>No hace falta tener Epic Games Launcher ni Fortnite instalados de antes: si faltan, el botón principal te guía para instalarlos, siempre a través de las herramientas oficiales de Epic.</li>
-      <li>No modifica archivos del juego ni el anti-cheat.</li>
-      <li>Windows puede mostrar un aviso de SmartScreen por ser una app nueva sin firmar — es normal en apps de un solo desarrollador; podés elegir "Más información → Ejecutar de todas formas".</li>
+      <li>En 2020, Epic sacó Fortnite de Mac durante su disputa legal con Apple, que le revocó la cuenta de desarrollador. Desde entonces no existe una forma oficial de instalar Fortnite directamente en macOS.</li>
+      <li>GeForce NOW es la vía oficial que reconoce Epic para jugar Fortnite en Mac: necesitás una cuenta gratis de NVIDIA y tu cuenta de Epic Games (se vinculan la primera vez).</li>
+      <li>Para mejor rendimiento que el navegador, podés instalar la <a href="https://www.nvidia.com/en-us/geforce-now/download/" target="_blank" rel="noopener">app nativa de GeForce NOW para Mac</a> (la distribuye NVIDIA, no nosotros).</li>
     </ul>
   </div>
 
   <footer>
-    ¿Estás en Mac? <a href="./mac.html">Jugá acá</a>
+    ¿Estás en Windows? <a href="./index.html">Descargá el launcher nativo acá</a>
     <br>
     Código abierto — <a href="https://github.com/Ridermathew-cmd/mateo_claude/tree/main/fortnite-launcher" target="_blank" rel="noopener">ver el código fuente</a>
-    <br>
-    Compartí esta página: tinyurl.com/fortnite-lite-launcher
   </footer>
 
 </body>
