@@ -30,6 +30,15 @@ rendimiento y limpieza de Windows.
 - Limpieza de Windows: borra temporales y opcionalmente vacia la papelera de
   reciclaje.
 - Pantalla completa (F11 o boton), ventana redimensionable.
+- **Fondo tipo "vidrio esmerilado"** (estilo Liquid Glass de iOS 26): una
+  imagen propia con paisaje en bloques (cielo, sol, colinas, arboles —
+  dibujada a mano en [generate_background.ps1](generate_background.ps1), sin
+  usar texturas ni assets reales de Minecraft) con blur y un velo oscuro
+  encima para que el texto siga siendo legible. Los titulos de cada seccion
+  tienen colores distintos (azul, naranja, violeta, verde) para darle un
+  toque multicolor sin depender de un blur real del escritorio.
+- Si la app llegara a crashear, escribe el detalle en `crash.log` al lado
+  del .exe (util para diagnosticar problemas reportados).
 
 ## Requisitos para compilar
 

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,17 @@ public class MainForm : Form
     private static readonly Color CardBg = Color.FromArgb(24, 24, 27);
     private static readonly Color BorderColor = Color.FromArgb(55, 55, 60);
     private static readonly Color TextSecondary = Color.FromArgb(170, 170, 175);
+
+    // Fondo tipo vidrio esmerilado: no un blur en vivo del escritorio, sino
+    // una imagen propia (paisaje en bloques inspirado en Minecraft, sin
+    // texturas reales del juego) ya generada con blur y un velo oscuro
+    // encima para que el texto siga siendo legible.
+    private static readonly Color GlassKey = Color.Transparent;
+
+    private static readonly Color AccentJava = Color.FromArgb(90, 160, 235);
+    private static readonly Color AccentBedrock = Color.FromArgb(232, 163, 61);
+    private static readonly Color AccentPerf = Color.FromArgb(165, 133, 235);
+    private static readonly Color AccentCleanup = Color.FromArgb(95, 199, 158);
 
     private readonly Label _javaStatusLabel;
     private readonly Button _javaButton;
@@ -50,6 +62,8 @@ public class MainForm : Form
         MaximizeBox = true;
         StartPosition = FormStartPosition.CenterScreen;
         BackColor = BgDark;
+        BackgroundImage = LoadBackgroundImage();
+        BackgroundImageLayout = ImageLayout.Stretch;
         KeyPreview = true;
         KeyDown += OnMainFormKeyDown;
 
@@ -58,7 +72,7 @@ public class MainForm : Form
         {
             Location = new Point(0, 0),
             Size = new Size(150, 560),
-            BackColor = SidebarBg,
+            BackColor = GlassKey,
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
         };
 
@@ -67,7 +81,7 @@ public class MainForm : Form
             Text = "MINECRAFT",
             Font = new Font("Segoe UI", 12, FontStyle.Bold),
             ForeColor = Color.White,
-            BackColor = SidebarBg,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(18, 20)
         };
@@ -77,7 +91,7 @@ public class MainForm : Form
             Text = "Launcher Ligero",
             Font = new Font("Segoe UI", 8),
             ForeColor = TextSecondary,
-            BackColor = SidebarBg,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(18, 44)
         };
@@ -95,7 +109,7 @@ public class MainForm : Form
         {
             Location = new Point(166, 18),
             Size = new Size(400, 522),
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoScroll = true,
             Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
         };
@@ -104,8 +118,8 @@ public class MainForm : Form
         {
             Text = "Java Edition",
             Font = new Font("Segoe UI", 10, FontStyle.Bold),
-            ForeColor = Color.White,
-            BackColor = BgDark,
+            ForeColor = AccentJava,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 0)
         };
@@ -114,7 +128,7 @@ public class MainForm : Form
         {
             Text = "Buscando instalacion...",
             ForeColor = TextSecondary,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 22),
             MaximumSize = new Size(390, 0)
@@ -138,8 +152,8 @@ public class MainForm : Form
         {
             Text = "Bedrock Edition",
             Font = new Font("Segoe UI", 10, FontStyle.Bold),
-            ForeColor = Color.White,
-            BackColor = BgDark,
+            ForeColor = AccentBedrock,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 104)
         };
@@ -148,7 +162,7 @@ public class MainForm : Form
         {
             Text = "Buscando instalacion...",
             ForeColor = TextSecondary,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 126),
             MaximumSize = new Size(390, 0)
@@ -172,8 +186,8 @@ public class MainForm : Form
         {
             Text = "Rendimiento",
             Font = new Font("Segoe UI", 10, FontStyle.Bold),
-            ForeColor = Color.White,
-            BackColor = BgDark,
+            ForeColor = AccentPerf,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 212)
         };
@@ -200,7 +214,7 @@ public class MainForm : Form
         {
             Text = "Modo Juego de Windows: consultando...",
             ForeColor = TextSecondary,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 414)
         };
@@ -212,7 +226,7 @@ public class MainForm : Form
         {
             Text = "Grabacion en segundo plano (Game DVR): consultando...",
             ForeColor = TextSecondary,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 474)
         };
@@ -224,7 +238,7 @@ public class MainForm : Form
         {
             Text = "Limpieza de Windows:",
             ForeColor = Color.White,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 534)
         };
@@ -238,7 +252,7 @@ public class MainForm : Form
         {
             Text = "",
             ForeColor = TextSecondary,
-            BackColor = BgDark,
+            BackColor = GlassKey,
             AutoSize = true,
             Location = new Point(0, 616),
             MaximumSize = new Size(380, 0)
@@ -267,13 +281,27 @@ public class MainForm : Form
         };
     }
 
+    private static Image? LoadBackgroundImage()
+    {
+        try
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream("MinecraftLauncher.Assets.background.png");
+            return stream is null ? null : Image.FromStream(stream);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     private static CheckBox CreateCheckBox(string text, int y, bool defaultChecked) => new()
     {
         Text = text,
         Checked = defaultChecked,
         AutoSize = true,
         ForeColor = Color.White,
-        BackColor = BgDark,
+        BackColor = GlassKey,
         Location = new Point(0, y)
     };
 
@@ -319,16 +347,26 @@ public class MainForm : Form
             WindowState = FormWindowState.Maximized;
             _isFullScreen = true;
             _fullscreenButton.Text = "Salir (Esc)";
+            return;
         }
-        else
-        {
-            WindowState = FormWindowState.Normal;
-            FormBorderStyle = _restoreBorderStyle;
-            WindowState = _restoreWindowState;
-            Bounds = _restoreBounds;
-            _isFullScreen = false;
-            _fullscreenButton.Text = "Pantalla completa";
-        }
+
+        // Cambiar FormBorderStyle hace que Windows recree la ventana por
+        // dentro, lo que parpadea si queda visible durante el proceso. Al
+        // salir de pantalla completa se oculta un instante mientras se
+        // hacen todos los cambios juntos (al entrar no hace falta: no se
+        // nota parpadeo en ese sentido).
+        SuspendLayout();
+        Visible = false;
+
+        WindowState = FormWindowState.Normal;
+        FormBorderStyle = _restoreBorderStyle;
+        WindowState = _restoreWindowState;
+        Bounds = _restoreBounds;
+        _isFullScreen = false;
+        _fullscreenButton.Text = "Pantalla completa";
+
+        ResumeLayout(true);
+        Visible = true;
     }
 
     private void RefreshDetection()
