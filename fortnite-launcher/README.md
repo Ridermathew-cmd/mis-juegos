@@ -110,12 +110,19 @@ chequear a mano.
 
 **Para publicar una actualizacion nueva:**
 1. Subir el numero de version en `UpdateManager.CurrentVersion`
-   (formato `Major.Minor.Patch`, se compara con `System.Version`).
-2. Compilar y publicar (ver mas abajo), reemplazar el `.zip` en
-   `fortnite-launcher-web/downloads/FortniteLauncherLigero.zip`.
-3. Actualizar `fortnite-launcher-web/downloads/version.json` con el mismo
-   numero de version nuevo (y el mismo `downloadUrl`, no cambia).
-4. Commit + push. Los usuarios con una version anterior van a ver el aviso la
+   (formato `Major.Minor.Patch`, se compara con `System.Version`) y en
+   `installer/setup.iss` (`#define MyAppVersion`).
+2. Compilar y publicar (ver mas abajo).
+3. Reemplazar el `.zip` en
+   `fortnite-launcher-web/downloads/FortniteLauncherLigero.zip` — esto sigue
+   siendo necesario aunque la descarga principal de la pagina ahora sea el
+   instalador, porque el auto-update interno (arriba) descarga y extrae ese
+   `.zip`, no el instalador.
+4. Recompilar el instalador (ver "Publicar el instalador" mas abajo) y
+   reemplazar `fortnite-launcher-web/downloads/FortniteLiteLauncher-Setup.exe`.
+5. Actualizar `fortnite-launcher-web/downloads/version.json` con el mismo
+   numero de version nuevo (y el mismo `downloadUrl` al `.zip`, no cambia).
+6. Commit + push. Los usuarios con una version anterior van a ver el aviso la
    proxima vez que abran el launcher.
 
 ## Requisitos para compilar
@@ -156,6 +163,31 @@ mas chico:
 ```
 dotnet publish -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true
 ```
+
+## Publicar el instalador (lo que se ofrece en la pagina de descarga)
+
+Igual que Minecraft: se empaqueta con
+[Inno Setup](https://jrsoftware.org/isinfo.php) (gratis,
+`winget install JRSoftware.InnoSetup`) para dar un instalador real en vez de
+un `.zip` con carpeta suelta.
+
+1. Publicar el build (arriba) y borrar cualquier `.pdb` o `.zip` viejo que
+   haya quedado en `bin\Release\net8.0-windows\win-x64\publish\` antes del
+   siguiente paso (Inno Setup empaqueta todo lo que encuentre ahi).
+2. Compilar el instalador:
+   ```
+   cd installer
+   iscc setup.iss
+   ```
+   El resultado queda en
+   `bin\installer\FortniteLiteLauncher-Setup.exe`. Se instala por usuario
+   (sin pedir admin) en
+   `%LocalAppData%\Programs\Fortnite Launcher Ligero`.
+3. Copiar ese `.exe` a
+   `fortnite-launcher-web/downloads/FortniteLiteLauncher-Setup.exe`.
+4. El `.zip` normal (ver arriba) tambien hay que seguir publicandolo aparte:
+   lo usa el auto-update interno del launcher (ver seccion de arriba), no el
+   instalador.
 
 ## Notas
 
