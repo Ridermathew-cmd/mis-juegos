@@ -349,6 +349,7 @@ public class MainForm : Form
             RefreshGameDvrStatus();
             _ = RefreshPromotionsAsync();
             _ = CheckForUpdateOnStartupAsync();
+            ToggleFullScreen();
         };
     }
 

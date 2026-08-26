@@ -20,7 +20,7 @@ public record UpdateInfo(string Version, string DownloadUrl);
 /// </summary>
 public static class UpdateManager
 {
-    public const string CurrentVersion = "1.1.0";
+    public const string CurrentVersion = "1.2.0";
 
     private const string VersionInfoUrl =
         "https://ridermathew-cmd.github.io/mis-juegos/fortnite-launcher-web/downloads/version.json";

@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "downloadUrl": "https://ridermathew-cmd.github.io/mis-juegos/fortnite-launcher-web/downloads/FortniteLauncherLigero.zip",
-  "notes": "Icono propio, pantalla completa, auto-instalacion de Epic/Fortnite y limpieza de Windows."
+  "notes": "El launcher ahora arranca directo en pantalla completa (Esc o el boton de la barra lateral para salir)."
 }
