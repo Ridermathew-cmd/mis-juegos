@@ -5,12 +5,13 @@ Launcher liviano para PC de bajos recursos. No reemplaza a Epic Games Launcher
 protocolo (`com.epicgames.launcher://`) para abrir Fortnite directo, sin pasar
 por la pantalla principal de la tienda.
 
-Es exclusivo de Windows (WinForms no corre en macOS). Para Mac hay una pagina
-aparte, [mac.html](../fortnite-launcher-web/mac.html), que lleva directo a
-jugar Fortnite por streaming via GeForce NOW — Epic no ofrece instalacion
-nativa de Fortnite en Mac desde 2020 (perdio la cuenta de desarrollador de
-Apple durante su disputa legal), asi que streaming es la unica via oficial
-que reconoce Epic hoy.
+Es exclusivo de Windows (WinForms no corre en macOS). La pagina de descarga
+([fortnite-launcher-web/index.html](../fortnite-launcher-web/index.html))
+tiene, mas abajo de la descarga de Windows, una seccion para Mac que lleva
+directo a jugar Fortnite por streaming (GeForce NOW, Amazon Luna o
+Boosteroid) — Epic no ofrece instalacion nativa de Fortnite en Mac desde 2020
+(perdio la cuenta de desarrollador de Apple durante su disputa legal), asi
+que streaming es la unica via oficial que reconoce Epic hoy.
 
 ## Interfaz
 

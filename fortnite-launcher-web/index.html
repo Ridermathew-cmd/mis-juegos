@@ -94,6 +94,68 @@
   }
   .requirements ul { margin: 8px 0 0; padding-left: 20px; }
   .requirements li { margin-bottom: 4px; }
+  .requirements a { color: var(--text); }
+  .section-divider {
+    width: 100%;
+    max-width: 640px;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 32px;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-align: center;
+    max-width: 480px;
+    margin-bottom: 24px;
+  }
+  .services {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .service-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .service-card h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+  }
+  .service-card p {
+    margin: 0 0 16px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    line-height: 1.5;
+    flex-grow: 1;
+  }
+  .play-btn {
+    background: #ffffff;
+    color: #0a0a0c;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .play-btn:hover { background: #e6e6e6; }
+  @media (max-width: 560px) {
+    .services { grid-template-columns: 1fr; }
+  }
   footer {
     margin-top: 48px;
     color: var(--text-secondary);
@@ -144,9 +206,39 @@
     </ul>
   </div>
 
+  <div class="section-divider" id="mac"></div>
+
+  <div class="section-title">¿Jugás en Mac?</div>
+  <div class="section-subtitle">Fortnite no tiene instalación nativa en macOS desde 2020 (Epic perdió la cuenta de desarrollador de Apple durante su disputa legal). La forma oficial de jugarlo hoy es por streaming en la nube — elegí con qué servicio:</div>
+
+  <div class="services">
+    <div class="service-card">
+      <h3>GeForce NOW</h3>
+      <p>El mas usado para Fortnite en Mac. Cuenta gratis de NVIDIA + tu cuenta de Epic. Espera en cola en el nivel gratis.</p>
+      <a class="play-btn" href="https://play.geforcenow.com/games?search=Fortnite" target="_blank" rel="noopener">Jugar</a>
+    </div>
+    <div class="service-card">
+      <h3>Amazon Luna</h3>
+      <p>Tiene un canal "Fortnite+" gratuito, sin necesitar la suscripción Luna+. Cuenta de Amazon + tu cuenta de Epic.</p>
+      <a class="play-btn" href="https://luna.amazon.com/" target="_blank" rel="noopener">Jugar</a>
+    </div>
+    <div class="service-card">
+      <h3>Boosteroid</h3>
+      <p>Otra opción de streaming en la nube con soporte para Fortnite, con y sin suscripción paga.</p>
+      <a class="play-btn" href="https://boosteroid.com/" target="_blank" rel="noopener">Jugar</a>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3>Por qué no hay instalador nativo en Mac</h3>
+    <ul>
+      <li>En 2020, Epic sacó Fortnite de Mac durante su disputa legal con Apple, que le revocó la cuenta de desarrollador. Desde entonces no existe una forma oficial de instalar Fortnite directamente en macOS.</li>
+      <li>El streaming en la nube es la via que reconoce Epic para jugar Fortnite en Mac hoy: iniciás sesión con tu cuenta real de Epic Games dentro del servicio que elijas, con tu mismo progreso y objetos.</li>
+      <li>Para mejor rendimiento que el navegador, GeForce NOW y Boosteroid tienen apps nativas para Mac en sus paginas oficiales (las distribuye cada empresa, no nosotros).</li>
+    </ul>
+  </div>
+
   <footer>
-    ¿Estás en Mac? <a href="./mac.html">Jugá acá</a>
-    <br>
     Código abierto — <a href="https://github.com/Ridermathew-cmd/mateo_claude/tree/main/fortnite-launcher" target="_blank" rel="noopener">ver el código fuente</a>
     <br>
     Compartí esta página: tinyurl.com/fortnite-lite-launcher
