@@ -1045,7 +1045,7 @@ async function loginWithGoogle() {
     myPin = '';
     showScreen('screen-menu');
   } catch(e) {
-    document.getElementById('name-error').textContent = 'Error al iniciar con Google. Intenta como invitado.';
+    document.getElementById('name-error').textContent = 'Error: ' + (e.code || e.message);
   }
 }
 
