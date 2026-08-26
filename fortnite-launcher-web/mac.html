@@ -38,48 +38,48 @@
     text-align: center;
     max-width: 480px;
   }
-  .download-btn {
-    background: #ffffff;
-    color: #0a0a0c;
-    font-weight: 700;
-    font-size: 18px;
-    padding: 16px 40px;
-    border-radius: 8px;
-    text-decoration: none;
-    display: inline-block;
-    margin-bottom: 8px;
-  }
-  .download-btn:hover { background: #e6e6e6; }
-  .meta {
-    color: var(--text-secondary);
-    font-size: 12px;
-    margin-bottom: 40px;
-    text-align: center;
-    max-width: 480px;
-  }
-  .features {
+  .services {
     width: 100%;
     max-width: 640px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 40px;
   }
-  .card {
+  .service-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 18px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
-  .card h3 {
+  .service-card h3 {
     margin: 0 0 8px;
-    font-size: 14px;
+    font-size: 15px;
   }
-  .card p {
-    margin: 0;
+  .service-card p {
+    margin: 0 0 16px;
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1.5;
+    flex-grow: 1;
+  }
+  .play-btn {
+    background: #ffffff;
+    color: #0a0a0c;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .play-btn:hover { background: #e6e6e6; }
+  @media (max-width: 560px) {
+    .services { grid-template-columns: 1fr; }
   }
   .requirements {
     width: 100%;
@@ -111,27 +111,23 @@
 <body>
 
   <div class="logo">FORTNITE</div>
-  <div class="subtitle">En Mac, Fortnite se juega por streaming (GeForce NOW) — Epic no ofrece instalación nativa desde 2020.</div>
+  <div class="subtitle">En Mac, Fortnite se juega por streaming en la nube — Epic no ofrece instalación nativa desde 2020. Elegí con qué servicio jugar:</div>
 
-  <a class="download-btn" href="https://play.geforcenow.com/games?search=Fortnite" target="_blank" rel="noopener">Jugar por streaming (GeForce NOW)</a>
-  <div class="meta">Abre GeForce NOW en el navegador · gratis para empezar</div>
-
-  <div class="features">
-    <div class="card">
-      <h3>Sin instalación</h3>
-      <p>El juego corre en los servidores de NVIDIA y se transmite a tu Mac — no ocupa espacio en disco ni exige una Mac potente.</p>
+  <div class="services">
+    <div class="service-card">
+      <h3>GeForce NOW</h3>
+      <p>El mas usado para Fortnite en Mac. Cuenta gratis de NVIDIA + tu cuenta de Epic. Espera en cola en el nivel gratis.</p>
+      <a class="play-btn" href="https://play.geforcenow.com/games?search=Fortnite" target="_blank" rel="noopener">Jugar</a>
     </div>
-    <div class="card">
-      <h3>Tu cuenta de Epic de siempre</h3>
-      <p>Iniciás sesión con tu cuenta real de Epic Games dentro de GeForce NOW: mismo progreso, mismos objetos.</p>
+    <div class="service-card">
+      <h3>Amazon Luna</h3>
+      <p>Tiene un canal "Fortnite+" gratuito, sin necesitar la suscripción Luna+. Cuenta de Amazon + tu cuenta de Epic.</p>
+      <a class="play-btn" href="https://luna.amazon.com/" target="_blank" rel="noopener">Jugar</a>
     </div>
-    <div class="card">
-      <h3>Nivel gratis disponible</h3>
-      <p>La membresía gratis de GeForce NOW alcanza para jugar (con espera en cola); las pagas dan acceso prioritario y mejor calidad.</p>
-    </div>
-    <div class="card">
-      <h3>App nativa opcional</h3>
-      <p>Para mejor rendimiento que el navegador, NVIDIA tiene una app de GeForce NOW para Mac (enlace abajo).</p>
+    <div class="service-card">
+      <h3>Boosteroid</h3>
+      <p>Otra opción de streaming en la nube con soporte para Fortnite, con y sin suscripción paga.</p>
+      <a class="play-btn" href="https://boosteroid.com/" target="_blank" rel="noopener">Jugar</a>
     </div>
   </div>
 
@@ -139,8 +135,8 @@
     <h3>Por qué no hay instalador nativo</h3>
     <ul>
       <li>En 2020, Epic sacó Fortnite de Mac durante su disputa legal con Apple, que le revocó la cuenta de desarrollador. Desde entonces no existe una forma oficial de instalar Fortnite directamente en macOS.</li>
-      <li>GeForce NOW es la vía oficial que reconoce Epic para jugar Fortnite en Mac: necesitás una cuenta gratis de NVIDIA y tu cuenta de Epic Games (se vinculan la primera vez).</li>
-      <li>Para mejor rendimiento que el navegador, podés instalar la <a href="https://www.nvidia.com/en-us/geforce-now/download/" target="_blank" rel="noopener">app nativa de GeForce NOW para Mac</a> (la distribuye NVIDIA, no nosotros).</li>
+      <li>El streaming en la nube es la via que reconoce Epic para jugar Fortnite en Mac hoy: iniciás sesión con tu cuenta real de Epic Games dentro del servicio que elijas, con tu mismo progreso y objetos.</li>
+      <li>Para mejor rendimiento que el navegador, GeForce NOW y Boosteroid tienen apps nativas para Mac en sus paginas oficiales (las distribuye cada empresa, no nosotros).</li>
     </ul>
   </div>
 
