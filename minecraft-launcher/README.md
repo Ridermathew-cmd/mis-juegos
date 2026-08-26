@@ -51,12 +51,36 @@ Microsoft.DotNet.SDK.8`).
 dotnet run
 ```
 
-## Publicar un .exe para distribuir
+## Publicar el instalador para distribuir
 
-```
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
-```
+A diferencia de Fortnite (que se distribuye como .zip), este se empaqueta
+como un instalador real con [Inno Setup](https://jrsoftware.org/isinfo.php)
+(gratis, `winget install JRSoftware.InnoSetup`), asi que quien lo descarga
+recibe un solo `.exe` que instala, crea accesos directos y se puede
+desinstalar desde "Agregar o quitar programas" — no una carpeta suelta.
 
-El resultado queda en `bin\Release\net8.0-windows\win-x64\publish\`. Igual
-que con Fortnite, hay que llevarse toda la carpeta (no solo el .exe) porque
-WinForms necesita algunas DLLs nativas al lado.
+1. Publicar el build:
+   ```
+   dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true
+   ```
+   Borrar cualquier `.pdb` o `.zip` viejo que haya quedado en
+   `bin\Release\net8.0-windows\win-x64\publish\` antes del siguiente paso
+   (Inno Setup empaqueta todo lo que encuentre en esa carpeta).
+
+2. Compilar el instalador:
+   ```
+   cd installer
+   iscc setup.iss
+   ```
+   (`iscc` es `ISCC.exe` de Inno Setup; si no esta en el PATH, usar la ruta
+   completa, ej. `C:\Users\<usuario>\AppData\Local\Programs\Inno Setup 6\ISCC.exe`)
+
+   El resultado queda en `bin\installer\MinecraftLauncherLigero-Setup.exe`.
+   Se instala por usuario (sin pedir admin) en
+   `%LocalAppData%\Programs\Minecraft Launcher Ligero`.
+
+3. Copiar ese `.exe` a
+   `minecraft-launcher-web/downloads/MinecraftLauncherLigero-Setup.exe`.
+
+Si se quiere subir la version, editar `AppVersion` en
+[installer/setup.iss](installer/setup.iss).
