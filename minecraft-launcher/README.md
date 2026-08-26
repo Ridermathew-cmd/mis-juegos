@@ -39,6 +39,13 @@ rendimiento y limpieza de Windows.
   toque multicolor sin depender de un blur real del escritorio.
 - Si la app llegara a crashear, escribe el detalle en `crash.log` al lado
   del .exe (util para diagnosticar problemas reportados).
+- **Pantalla de bienvenida animada** al abrir (2.6 segundos): un splash con
+  un pulso tipo latido de corazon, hecho en HTML/CSS/Canvas
+  ([Assets/splash.html](Assets/splash.html)), mostrado con un control
+  WebView2 embebido (el motor de Microsoft Edge, incluido de fabrica en
+  Windows 10/11 actualizados). Si WebView2 no esta disponible en el equipo,
+  se salta el splash sola y arranca directo al launcher — es un adorno
+  visual, nunca bloquea el uso de la app.
 
 ## Requisitos para compilar
 
@@ -75,12 +82,12 @@ desinstalar desde "Agregar o quitar programas" — no una carpeta suelta.
    (`iscc` es `ISCC.exe` de Inno Setup; si no esta en el PATH, usar la ruta
    completa, ej. `C:\Users\<usuario>\AppData\Local\Programs\Inno Setup 6\ISCC.exe`)
 
-   El resultado queda en `bin\installer\MinecraftLauncherLigero-Setup.exe`.
+   El resultado queda en `bin\installer\MinePulseLite-Setup.exe`.
    Se instala por usuario (sin pedir admin) en
    `%LocalAppData%\Programs\Minecraft Launcher Ligero`.
 
 3. Copiar ese `.exe` a
-   `minecraft-launcher-web/downloads/MinecraftLauncherLigero-Setup.exe`.
+   `minecraft-launcher-web/downloads/MinePulseLite-Setup.exe`.
 
 Si se quiere subir la version, editar `AppVersion` en
 [installer/setup.iss](installer/setup.iss).

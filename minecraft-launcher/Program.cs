@@ -17,7 +17,24 @@ internal static class Program
         Application.SetHighDpiMode(HighDpiMode.SystemAware);
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+
+        ShowSplash();
+
         Application.Run(new MainForm());
+    }
+
+    private static void ShowSplash()
+    {
+        try
+        {
+            using var splash = new SplashForm();
+            splash.ShowDialog();
+        }
+        catch
+        {
+            // Si el splash falla por cualquier motivo, se sigue directo
+            // al launcher: es un adorno, no algo esencial.
+        }
     }
 
     private static void LogCrash(string source, Exception? ex)
