@@ -12,6 +12,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "5501", "--directory", "fortnite-launcher-web"],
       "port": 5501
+    },
+    {
+      "name": "minecraft-launcher-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "5502", "--directory", "minecraft-launcher-web"],
+      "port": 5502
     }
   ]
 }
