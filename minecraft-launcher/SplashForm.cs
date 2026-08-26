@@ -16,7 +16,11 @@ namespace MinecraftLauncher;
 /// </summary>
 public class SplashForm : Form
 {
-    private const int DisplayMilliseconds = 2600;
+    // El pulso dura ~2.3s por ciclo (late fuerte y despues una pausa larga,
+    // como un monitor cardiaco). Con 2.6s solo se alcanza a ver un latido
+    // y despues la pausa justo antes de cerrarse, lo que da sensacion de
+    // que se traba. Dejando ~2 ciclos completos se nota que es ritmico.
+    private const int DisplayMilliseconds = 4800;
 
     private readonly WebView2 _webView;
     private readonly System.Windows.Forms.Timer _closeTimer;
